@@ -1,11 +1,12 @@
-import { BuildingIcon } from 'lucide-react';
+
+import { Handshake } from 'lucide-react'; // Changed icon
 import Link from 'next/link';
 
 export function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2" prefetch={false}>
-      <BuildingIcon className="h-7 w-7 text-primary" />
-      <span className="text-xl font-semibold text-primary">Inertia</span>
+      <Handshake className="h-7 w-7 text-primary" /> {/* Changed icon */}
+      <span className="text-xl font-semibold text-primary">SubConnect</span>
     </Link>
   );
 }

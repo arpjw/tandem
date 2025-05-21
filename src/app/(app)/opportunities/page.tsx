@@ -5,21 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUpRight, PlusCircle, Briefcase as BriefcaseIcon, AlertTriangle } from 'lucide-react'; 
-import { mockOpportunities } from '@/lib/mockData'; // Changed from mockProjects
-import type { Opportunity } from '@/lib/types'; // Changed from Project
+import { mockOpportunities } from '@/lib/mockData';
+import type { Opportunity } from '@/lib/types';
 import { PageTitle } from '@/components/PageTitle';
 
-export default function ProjectsPage() { // Kept function name, but it now handles Opportunities
-  const opportunities: Opportunity[] = mockOpportunities; // Changed from projects: Project[]
+export default function OpportunitiesPage() {
+  const opportunities: Opportunity[] = mockOpportunities;
 
   return (
     <>
       <PageTitle 
-        title="Subcontracting Opportunities (via /projects)" // Updated title
-        description="Browse and manage subcontracting opportunities and RFPs." // Updated description
+        title="Subcontracting Opportunities"
+        description="Browse and manage subcontracting opportunities and RFPs."
         action={
           <Button asChild>
-            <Link href="/opportunities/new"> {/* Link to new canonical path */}
+            <Link href="/opportunities/new">
               <PlusCircle className="mr-2 h-4 w-4" /> Post New Opportunity
             </Link>
           </Button>
@@ -29,22 +29,22 @@ export default function ProjectsPage() { // Kept function name, but it now handl
       {opportunities.length === 0 ? (
          <div className="text-center py-12">
           <BriefcaseIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-2 text-lg font-semibold">No Opportunities Found</h3> {/* Updated text */}
+          <h3 className="mt-2 text-lg font-semibold">No Opportunities Found</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Enterprises and Prime Contractors: Get started by posting a new opportunity.
             <br />
             Small Businesses: Check back soon for new listings.
           </p>
           <Button asChild className="mt-4">
-            <Link href="/opportunities/new"> {/* Link to new canonical path */}
+            <Link href="/opportunities/new">
               <PlusCircle className="mr-2 h-4 w-4" /> Post New Opportunity
             </Link>
           </Button>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {opportunities.map((opportunity) => ( // Iterating over opportunities
-            <Link key={opportunity.id} href={`/opportunities/${opportunity.id}`} className="block group"> {/* Link to new canonical path */}
+          {opportunities.map((opportunity) => (
+            <Link key={opportunity.id} href={`/opportunities/${opportunity.id}`} className="block group">
               <Card className="flex flex-col h-full transition-all duration-200 ease-in-out group-hover:shadow-xl group-hover:border-primary/50">
                 <CardHeader>
                   {opportunity.imageUrl && (
@@ -54,7 +54,7 @@ export default function ProjectsPage() { // Kept function name, but it now handl
                         alt={opportunity.title} 
                         layout="fill" 
                         objectFit="cover"
-                        data-ai-hint="business collaboration contract" 
+                        data-ai-hint="business collaboration contract" /* Updated hint */
                         className="transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>

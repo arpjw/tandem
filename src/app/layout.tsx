@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
@@ -15,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Inertia',
-  description: 'Connecting businesses with skilled vendors through AI-powered matching.',
+  title: 'SubConnect - AI-Powered Subcontracting Matchmaking',
+  description: 'Connecting small businesses with subcontracting opportunities from large enterprises, government contractors, and prime vendors.',
 };
 
 export default function RootLayout({

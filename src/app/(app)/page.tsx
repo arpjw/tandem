@@ -1,43 +1,47 @@
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowUpRight, Users, Briefcase, MessageSquare } from 'lucide-react';
+import { Briefcase, Users, MessageSquare, CheckCircle, Award } from 'lucide-react';
 import { PageTitle } from '@/components/PageTitle';
 
 export default function DashboardPage() {
   return (
     <>
-      <PageTitle title="Dashboard" description="Welcome to Inertia, your platform for B2B collaboration." />
+      <PageTitle 
+        title="SubConnect Dashboard" 
+        description="Welcome to SubConnect, your AI-powered subcontracting matchmaking platform." 
+      />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Opportunities</CardTitle>
             <Briefcase className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">+5 since last month</p>
+            <div className="text-2xl font-bold">25</div>
+            <p className="text-xs text-muted-foreground">+8 new this week</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Registered Vendors</CardTitle>
+            <CardTitle className="text-sm font-medium">Verified SMB Vendors</CardTitle>
             <Users className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">150</div>
-            <p className="text-xs text-muted-foreground">+20 new this month</p>
+            <div className="text-2xl font-bold">350</div>
+            <p className="text-xs text-muted-foreground">+15 verified this month</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Messages</CardTitle>
-            <MessageSquare className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Supplier Diversity Matches</CardTitle>
+            <Award className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5</div>
-            <p className="text-xs text-muted-foreground">2 unread</p>
+            <div className="text-2xl font-bold">78</div>
+            <p className="text-xs text-muted-foreground">Matching MWBE, VOSB goals</p>
           </CardContent>
         </Card>
       </div>
@@ -46,20 +50,25 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Get started with common tasks.</CardDescription>
+            <CardDescription>Key actions for prime contractors and SMBs.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button asChild className="w-full justify-start">
-              <Link href="/projects/new">
-                <Briefcase className="mr-2 h-4 w-4" /> Post a New Project
+              <Link href="/opportunities/new">
+                <Briefcase className="mr-2 h-4 w-4" /> Post New Opportunity
               </Link>
             </Button>
             <Button asChild variant="secondary" className="w-full justify-start">
               <Link href="/vendors/new">
-                <Users className="mr-2 h-4 w-4" /> Create Vendor Profile
+                <Users className="mr-2 h-4 w-4" /> Build/Update SMB Profile
               </Link>
             </Button>
             <Button asChild variant="secondary" className="w-full justify-start">
+              <Link href="/opportunities">
+                <CheckCircle className="mr-2 h-4 w-4" /> View Opportunity Feed
+              </Link>
+            </Button>
+             <Button asChild variant="secondary" className="w-full justify-start">
               <Link href="/communication">
                 <MessageSquare className="mr-2 h-4 w-4" /> Go to Communication Hub
               </Link>
@@ -69,21 +78,25 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-             <CardDescription>Overview of recent platform activities.</CardDescription>
+             <CardDescription>Latest platform updates and matches.</CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center justify-between">
-                <span>New project "AI Chatbot Integration" posted.</span>
+                <span>New Opportunity: "Logistics Support for FEMA Contract" posted.</span>
                 <Link href="#" className="text-primary hover:underline text-xs" prefetch={false}>View</Link>
               </li>
               <li className="flex items-center justify-between">
-                <span>Vendor "Tech Solutions Inc." updated their profile.</span>
+                <span>Vendor "TechSpark Innovations LLC" achieved 'Verified' status.</span>
                  <Link href="#" className="text-primary hover:underline text-xs" prefetch={false}>View</Link>
               </li>
               <li className="flex items-center justify-between">
-                <span>3 new vendor matches for "Mobile App Development".</span>
-                 <Link href="#" className="text-primary hover:underline text-xs" prefetch={false}>View</Link>
+                <span>AI matched 5 VOSBs to "Cybersecurity Subcontract".</span>
+                 <Link href="#" className="text-primary hover:underline text-xs" prefetch={false}>View Matches</Link>
+              </li>
+               <li className="flex items-center justify-between">
+                <span>"GreenLeaf Construction" updated their project history.</span>
+                 <Link href="#" className="text-primary hover:underline text-xs" prefetch={false}>View Profile</Link>
               </li>
             </ul>
           </CardContent>
