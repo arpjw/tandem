@@ -15,8 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { generateVendorProfileSummary } from '@/ai/flows/vendor-profile-generator'; // Updated import
-import type { VendorProfileOutput } from '@/ai/flows/vendor-profile-generator'; // Updated import
+import { generateVendorProfileSummary } from '@/ai/flows/vendor-profile-generator';
+import type { VendorProfileOutput } from '@/ai/flows/vendor-profile-generator';
 import { ArrowLeft, Loader2, Sparkles, Briefcase, Award, Building2, Clock, Layers, FileText, Users, ShieldCheck, PlusCircle, Trash2, Globe, Tag } from 'lucide-react';
 import { PageTitle } from '@/components/PageTitle';
 import { Separator } from '@/components/ui/separator';
@@ -42,7 +42,7 @@ const vendorFormSchema = z.object({
   projectHistory: z.array(projectHistorySchema).optional(),
   isVerified: z.boolean().default(false).optional(),
   naicsCodes: z.string().optional().describe("Comma-separated NAICS codes"),
-  dunsNumber: z.string().regex(/^\d{9}$/, {message: "DUNS number must be 9 digits."}).optional().or(z.literal('')), // Corrected order and allow empty string
+  dunsNumber: z.string().regex(/^\d{9}$/, {message: "DUNS number must be 9 digits."}).optional().or(z.literal('')),
 
   portfolioLinks: z.string().url({ message: "Please enter a valid URL for portfolio." }).optional().or(z.literal('')),
   yearsOfExperience: z.coerce.number().min(0, "Years of experience must be 0 or more.").optional(),
@@ -223,7 +223,7 @@ export default function NewVendorPage() {
                       <FormField control={form.control} name={`projectHistory.${index}.title`} render={({ field }) => ( <FormItem> <FormLabel>Project Title</FormLabel> <FormControl><Input placeholder="e.g., System Upgrade for Client X" {...field} /></FormControl><FormMessage /> </FormItem>)} />
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField control={form.control} name={`projectHistory.${index}.client`} render={({ field }) => ( <FormItem> <FormLabel>Client / Prime</FormLabel> <FormControl><Input placeholder="e.g., Major Corp Inc. / Gov Agency" {...field} /></FormControl><FormMessage /> </FormItem>)} />
-                        <FormField control={form.control} name={`projectHistory.${index}.year`} render={({ field }) => ( <FormItem> <FormLabel>Year Completed</FormLabel> <FormControl><Input type="number" placeholder="e.g., 2022" {...field} /></FormControl><FormMessage /> </FormItem>)} />
+                        <FormField control={form.control} name={`projectHistory.${index}.year`} render={({ field }) => ( <FormItem> <FormLabel>Year Completed</FormLabel><FormControl><Input type="number" placeholder="e.g., 2022" {...field} /></FormControl><FormMessage /> </FormItem>)} />
                       </div>
                       <FormField control={form.control} name={`projectHistory.${index}.description`} render={({ field }) => ( <FormItem> <FormLabel>Brief Description</FormLabel> <FormControl><Textarea placeholder="Role, responsibilities, key activities..." {...field} /></FormControl><FormMessage /> </FormItem>)} />
                       <FormField control={form.control} name={`projectHistory.${index}.outcome`} render={({ field }) => ( <FormItem> <FormLabel>Key Outcome / Result</FormLabel> <FormControl><Input placeholder="e.g., Achieved 20% cost savings" {...field} /></FormControl><FormMessage /> </FormItem>)} />
