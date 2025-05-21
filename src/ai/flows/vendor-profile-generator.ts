@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview Generates a compelling vendor profile summary for SubConnect, focusing on matchmaking strengths.
+ * @fileOverview Generates a compelling vendor profile summary for Inertia, focusing on matchmaking strengths.
  *
  * - generateVendorProfileSummary - A function that generates a vendor profile summary.
  * - VendorProfileInput - The input type for the generateVendorProfileSummary function.
@@ -25,9 +25,9 @@ const VendorProfileInputSchema = z.object({
 export type VendorProfileInput = z.infer<typeof VendorProfileInputSchema>;
 
 const VendorProfileOutputSchema = z.object({
-  profileSummary: z.string().describe('A concise, compelling summary of the vendor profile, suitable for display on a matchmaking platform. Highlight strengths, certifications, and suitability for subcontracting.'),
+  profileSummary: z.string().describe('A concise, compelling summary of the vendor profile, suitable for display on a matchmaking platform. Highlight strengths, certifications, and suitability for projects.'),
   suggestedKeywords: z.array(z.string()).describe('A list of 5-10 keywords that accurately represent the vendor\'s capabilities and focus, for use in search and matching algorithms. Include certifications as keywords if present.'),
-  readinessAssessment: z.string().optional().describe('A brief AI assessment of the vendor\'s readiness for larger contracts, based on provided info. Note any apparent strengths or areas that might need further development/clarification for primes (e.g., "Strong certifications, but capacity information would be beneficial for primes.").')
+  readinessAssessment: z.string().optional().describe('A brief AI assessment of the vendor\'s readiness for larger contracts/projects, based on provided info. Note any apparent strengths or areas that might need further development/clarification (e.g., "Strong certifications, but capacity information would be beneficial.").')
 });
 export type VendorProfileOutput = z.infer<typeof VendorProfileOutputSchema>;
 
@@ -39,27 +39,27 @@ const prompt = ai.definePrompt({
   name: 'vendorProfileSummaryPrompt',
   input: {schema: VendorProfileInputSchema},
   output: {schema: VendorProfileOutputSchema},
-  prompt: `You are an expert profile writer for SubConnect, an AI-powered matchmaking platform connecting small businesses (vendors) with subcontracting opportunities from large enterprises and government contractors. Your goal is to create a concise and impactful summary that highlights a vendor's strengths and suitability for these opportunities.
+  prompt: `You are an expert profile writer for Inertia, an AI-powered matchmaking platform connecting businesses with suitable vendors for their projects. Your goal is to create a concise and impactful summary that highlights a vendor's strengths and suitability for these opportunities.
 
 Vendor Information:
 Business Name: {{{businessName}}}
 Business Description: {{{businessDescription}}}
 {{#if expertiseAreas}}Expertise Areas: {{{expertiseAreas}}}{{/if}}
 {{#if keyServicesOffered}}Key Services Offered: {{{keyServicesOffered}}}{{/if}}
-{{#if certifications}}Certifications: {{{certifications}}} (Critically important for matching! Mention these prominently in the summary and keywords if provided.) {{/if}}
+{{#if certifications}}Certifications: {{{certifications}}} (Important for matching! Mention these prominently in the summary and keywords if provided.) {{/if}}
 {{#if projectHighlights}}Project Highlights: {{{projectHighlights}}}{{/if}}
 {{#if industryFocus}}Industry Focus: {{{industryFocus}}}{{/if}}
 
 Based on the information provided:
-1.  **Generate a Profile Summary**: Write a compelling paragraph (3-5 sentences) that a prime contractor would find attractive. Emphasize:
+1.  **Generate a Profile Summary**: Write a compelling paragraph (3-5 sentences) that a business looking to hire would find attractive. Emphasize:
     *   Key expertise and services.
-    *   Relevant certifications (especially diversity/government ones like MBE, WOSB, VOSB, SBA 8a, HUBZone, ISO, CMMC).
+    *   Relevant certifications (especially any indicating specialization or quality standards like ISO).
     *   Experience suggested by project highlights or description.
-    *   Overall suitability for subcontracting or partnering on larger projects.
-2.  **Suggest Keywords**: List 5-10 specific keywords for search and matchmaking. Include specific skills, services, certifications (e.g., "SBA 8a", "Cybersecurity", "Logistics", "Java", "ISO 9001"), and industry terms.
-3.  **Readiness Assessment (Optional)**: Briefly assess the vendor's apparent readiness for larger contracts. For example: "Strong certifications and clear expertise in X make them a promising candidate. Detailing project scale or team capacity could further strengthen their profile for prime contractors." or "Appears well-suited for Y type subcontracts; adding specific project outcomes would be beneficial."
+    *   Overall suitability for partnering on various projects.
+2.  **Suggest Keywords**: List 5-10 specific keywords for search and matchmaking. Include specific skills, services, certifications (e.g., "Web Development", "Cybersecurity", "Logistics", "Java", "ISO 9001"), and industry terms.
+3.  **Readiness Assessment (Optional)**: Briefly assess the vendor's apparent readiness for projects. For example: "Strong certifications and clear expertise in X make them a promising candidate. Detailing project scale or team capacity could further strengthen their profile." or "Appears well-suited for Y type projects; adding specific project outcomes would be beneficial."
 
-Focus on making the vendor attractive to prime contractors and large enterprises.
+Focus on making the vendor attractive to businesses seeking reliable partners.
 The tone should be professional, confident, and clear.
 Ensure the output matches the schema. Certifications are very important if provided.
 `,

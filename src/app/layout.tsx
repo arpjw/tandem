@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'SubConnect - AI-Powered Subcontracting Matchmaking',
-  description: 'Connecting small businesses with subcontracting opportunities from large enterprises, government contractors, and prime vendors.',
+  title: 'Inertia - AI-Powered Vendor Matching',
+  description: 'Inertia connects businesses with vendors using intelligent AI matching for project success.',
 };
 
 export default function RootLayout({

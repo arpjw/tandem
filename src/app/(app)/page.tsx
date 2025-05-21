@@ -9,8 +9,8 @@ export default function DashboardPage() {
   return (
     <>
       <PageTitle 
-        title="SubConnect Dashboard" 
-        description="Welcome to SubConnect, your AI-powered subcontracting matchmaking platform." 
+        title="Inertia Dashboard" 
+        description="Welcome to Inertia, your AI-powered vendor matchmaking platform." 
       />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -26,7 +26,7 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Verified SMB Vendors</CardTitle>
+            <CardTitle className="text-sm font-medium">Verified Vendors</CardTitle>
             <Users className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -36,12 +36,12 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Supplier Diversity Matches</CardTitle>
+            <CardTitle className="text-sm font-medium">AI-Powered Matches</CardTitle>
             <Award className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">78</div>
-            <p className="text-xs text-muted-foreground">Matching MWBE, VOSB goals</p>
+            <p className="text-xs text-muted-foreground">Successful pairings this quarter</p>
           </CardContent>
         </Card>
       </div>
@@ -50,17 +50,17 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Key actions for prime contractors and SMBs.</CardDescription>
+            <CardDescription>Key actions for businesses and vendors.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button asChild className="w-full justify-start">
               <Link href="/opportunities/new">
-                <Briefcase className="mr-2 h-4 w-4" /> Post New Opportunity
+                <Briefcase className="mr-2 h-4 w-4" /> Post New Project/Opportunity
               </Link>
             </Button>
             <Button asChild variant="secondary" className="w-full justify-start">
               <Link href="/vendors/new">
-                <Users className="mr-2 h-4 w-4" /> Build/Update SMB Profile
+                <Users className="mr-2 h-4 w-4" /> Build/Update Vendor Profile
               </Link>
             </Button>
             <Button asChild variant="secondary" className="w-full justify-start">
@@ -83,19 +83,19 @@ export default function DashboardPage() {
           <CardContent>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center justify-between">
-                <span>New Opportunity: "Logistics Support for FEMA Contract" posted.</span>
+                <span>New Opportunity: "Enterprise Software Upgrade" posted.</span>
                 <Link href="#" className="text-primary hover:underline text-xs" prefetch={false}>View</Link>
               </li>
               <li className="flex items-center justify-between">
-                <span>Vendor "TechSpark Innovations LLC" achieved 'Verified' status.</span>
+                <span>Vendor "Innovatech Solutions" achieved 'Verified' status.</span>
                  <Link href="#" className="text-primary hover:underline text-xs" prefetch={false}>View</Link>
               </li>
               <li className="flex items-center justify-between">
-                <span>AI matched 5 VOSBs to "Cybersecurity Subcontract".</span>
+                <span>AI matched 3 vendors to "Marketing Campaign Project".</span>
                  <Link href="#" className="text-primary hover:underline text-xs" prefetch={false}>View Matches</Link>
               </li>
                <li className="flex items-center justify-between">
-                <span>"GreenLeaf Construction" updated their project history.</span>
+                <span>"BuildRight Contractors" updated their portfolio.</span>
                  <Link href="#" className="text-primary hover:underline text-xs" prefetch={false}>View Profile</Link>
               </li>
             </ul>

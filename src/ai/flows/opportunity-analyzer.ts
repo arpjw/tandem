@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview Analyzes subcontracting opportunities and suggests relevant vendor qualifications.
+ * @fileOverview Analyzes project opportunities and suggests relevant vendor qualifications for the Inertia platform.
  *
  * - analyzeOpportunity - A function that analyzes opportunity details.
  * - AnalyzeOpportunityInput - The input type for the analyzeOpportunity function.
@@ -15,7 +15,7 @@ import {z} from 'genkit';
 const AnalyzeOpportunityInputSchema = z.object({
   opportunityDescription: z
     .string()
-    .describe('Detailed description of the subcontracting opportunity or RFP requirements.'),
+    .describe('Detailed description of the project opportunity or requirements.'),
   desiredBudget: z.string().optional().describe('The estimated budget or value of the opportunity.'),
   timeline: z.string().optional().describe('The expected timeline or duration of the work.'),
   requiredSkillsInput: z.string().optional().describe('Comma-separated list of essential skills provided by the user.'),
@@ -35,10 +35,10 @@ const AnalyzeOpportunityOutputSchema = z.object({
     .describe('Description of the suggested vendor experience level and domain expertise.'),
   suggestedCertifications: z
     .array(z.string())
-    .describe('List of relevant certifications (e.g., "SBA 8a", "ISO 9001", "WOSB") that vendors should possess.'),
+    .describe('List of relevant certifications (e.g., "ISO 9001", "PMP", specific tech certs) that vendors should possess.'),
   keyComplianceAreas: z
     .array(z.string())
-    .describe('Key compliance areas or regulations (e.g., "FISMA", "HIPAA", "ITAR") pertinent to the opportunity.'),
+    .describe('Key compliance areas or regulations (e.g., "GDPR", "HIPAA", "SOC 2") pertinent to the opportunity.'),
   potentialMatchKeywords: z
     .array(z.string())
     .describe('Keywords to help match vendors to this opportunity (e.g., industry, specific tech, type of service).')
@@ -57,13 +57,13 @@ const prompt = ai.definePrompt({
   name: 'analyzeOpportunityPrompt',
   input: {schema: AnalyzeOpportunityInputSchema},
   output: {schema: AnalyzeOpportunityOutputSchema},
-  prompt: `You are an expert in analyzing subcontracting opportunities, RFPs, and government solicitations. Your role is to help prime contractors and large enterprises identify the ideal qualifications for small business partners.
+  prompt: `You are an expert in analyzing project opportunities and requirements for Inertia, an AI-powered vendor matchmaking platform. Your role is to help businesses identify the ideal qualifications for vendor partners.
 
 Analyze the provided opportunity details. Based on this, you will:
 1.  Identify and list the most critical skills required.
 2.  Describe the ideal level and type of experience a vendor should have.
-3.  Suggest relevant business certifications (e.g., minority-owned, veteran-owned, SBA 8a, ISO 9001, CMMC) that would make a vendor a strong candidate, especially if diversity goals are mentioned.
-4.  Pinpoint key compliance areas or regulations (e.g., FISMA, HIPAA, ITAR, specific FAR clauses) that are likely important.
+3.  Suggest relevant business or professional certifications (e.g., ISO 9001, specific technology certifications, PMP) that would make a vendor a strong candidate.
+4.  Pinpoint key compliance areas or regulations (e.g., GDPR, HIPAA, SOC 2, industry-specific standards) that are likely important.
 5.  Generate a list of keywords that can be used for matching suitable vendors to this opportunity. These keywords should cover industry, specific technologies or services, and any special requirements.
 
 Opportunity Details:
@@ -71,12 +71,12 @@ Description: {{{opportunityDescription}}}
 {{#if desiredBudget}}Budget: {{{desiredBudget}}}{{/if}}
 {{#if timeline}}Timeline: {{{timeline}}}{{/if}}
 {{#if requiredSkillsInput}}User-Provided Required Skills: {{{requiredSkillsInput}}}{{/if}}
-{{#if diversityGoalsInput}}Stated Diversity Goals/Preferences: {{{diversityGoalsInput}}}{{/if}}
+{{#if diversityGoalsInput}}Stated Diversity Goals/Preferences: {{{diversityGoalsInput}}} (Note: While Inertia focuses on skills/experience, acknowledge these if stated, but focus primary suggestions on qualifications for the work itself.) {{/if}}
 {{#if complianceRequirementsInput}}User-Provided Compliance Needs: {{{complianceRequirementsInput}}}{{/if}}
 
 Provide your analysis in the specified output format.
-Focus on practical, actionable suggestions for finding qualified subcontractors.
-If diversity goals are mentioned (e.g., WOSB, MBE, VOSB), ensure your suggested certifications reflect these priorities.
+Focus on practical, actionable suggestions for finding qualified vendors.
+If diversity goals are mentioned, you can note them, but your primary analysis should focus on the direct qualifications needed to perform the work described in the opportunity.
 `,
 });
 
