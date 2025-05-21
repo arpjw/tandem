@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -14,9 +15,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { analyzeProjectRequirements } from '@/ai/flows/project-requirement-analyzer';
 import type { AnalyzeProjectRequirementsOutput } from '@/ai/flows/project-requirement-analyzer';
-import { ArrowLeft, Loader2, Sparkles, ListChecks, Brain } from 'lucide-react';
+import { ArrowLeft, Loader2, Sparkles, ListChecks, Brain, Users, Target, Milestone, Building } from 'lucide-react';
 import { PageTitle } from '@/components/PageTitle';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 const projectFormSchema = z.object({
   title: z.string().min(5, { message: "Project title must be at least 5 characters." }),
@@ -24,6 +26,10 @@ const projectFormSchema = z.object({
   budget: z.string().min(3, { message: "Please specify the budget." }),
   timeline: z.string().min(3, { message: "Please specify the timeline." }),
   requiredSkills: z.string().min(3, { message: "List at least one required skill (comma-separated)." }),
+  projectGoals: z.string().min(3, {message: "List at least one project goal (comma-separated)."}),
+  targetAudience: z.string().optional(),
+  keyDeliverables: z.string().min(3, {message: "List at least one key deliverable (comma-separated)."}),
+  companyBackground: z.string().optional(),
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
@@ -43,6 +49,10 @@ export default function NewProjectPage() {
       budget: '',
       timeline: '',
       requiredSkills: '',
+      projectGoals: '',
+      targetAudience: '',
+      keyDeliverables: '',
+      companyBackground: '',
     },
   });
 
@@ -83,7 +93,14 @@ export default function NewProjectPage() {
 
   async function onSubmit(data: ProjectFormValues) {
     setIsLoading(true);
-    console.log("Project data submitted:", { ...data, aiAnalysis });
+    const processedData = {
+      ...data,
+      requiredSkills: data.requiredSkills.split(',').map(s => s.trim()).filter(s => s),
+      projectGoals: data.projectGoals.split(',').map(s => s.trim()).filter(s => s),
+      keyDeliverables: data.keyDeliverables.split(',').map(s => s.trim()).filter(s => s),
+      aiAnalysis,
+    };
+    console.log("Project data submitted:", processedData);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     toast({
@@ -91,7 +108,7 @@ export default function NewProjectPage() {
       description: `"${data.title}" has been successfully posted.`,
     });
     setIsLoading(false);
-    router.push('/projects');
+    // router.push('/projects'); // Commented out to allow viewing console log
   }
 
   return (
@@ -123,6 +140,23 @@ export default function NewProjectPage() {
                       <FormLabel>Project Title</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., E-commerce Platform Revamp" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="companyBackground"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4 text-muted-foreground" /> Company Background (Optional)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Briefly describe your company..."
+                          className="min-h-[80px]"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -173,6 +207,47 @@ export default function NewProjectPage() {
                     )}
                   />
                 </div>
+                <Separator />
+                 <FormField
+                  control={form.control}
+                  name="projectGoals"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><Target className="mr-2 h-4 w-4 text-muted-foreground" /> Project Goals (comma-separated)</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="e.g., Increase sales, Improve UX, Reduce load time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="keyDeliverables"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><Milestone className="mr-2 h-4 w-4 text-muted-foreground" /> Key Deliverables (comma-separated)</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="e.g., Functional prototype, Final designs, Deployed application" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="targetAudience"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center"><Users className="mr-2 h-4 w-4 text-muted-foreground" /> Target Audience (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Young professionals, Small businesses" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Separator />
                 <FormField
                   control={form.control}
                   name="requiredSkills"

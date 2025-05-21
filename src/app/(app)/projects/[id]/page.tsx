@@ -1,9 +1,10 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, DollarSign, CalendarDays, ListChecks, Brain, Users, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Edit, DollarSign, CalendarDays, ListChecks, Brain, Users, MessageSquare, Target, Milestone, Building } from 'lucide-react';
 import { mockProjects, mockVendors } from '@/lib/mockData';
 import type { Project, Vendor } from '@/lib/types';
 import { PageTitle } from '@/components/PageTitle';
@@ -35,7 +36,7 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
     <>
       <PageTitle 
         title={project.title}
-        description="Detailed project information and requirements."
+        description={project.companyBackground || "Detailed project information and requirements."}
         action={
            <div className="flex gap-2">
             <Button variant="outline" asChild>
@@ -52,14 +53,23 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
         <div className="lg:col-span-2 space-y-8">
           <Card>
              {project.imageUrl && (
-              <div className="relative h-60 w-full rounded-t-lg overflow-hidden" data-ai-hint="collaboration project">
-                <Image src={project.imageUrl} alt={`${project.title} cover image`} layout="fill" objectFit="cover" />
+              <div className="relative h-60 w-full rounded-t-lg overflow-hidden">
+                <Image src={project.imageUrl} alt={`${project.title} cover image`} layout="fill" objectFit="cover" data-ai-hint="project collaboration"/>
               </div>
             )}
-            <CardHeader className={project.imageUrl ? "border-t" : ""}>
+            <CardHeader className={project.imageUrl ? "pt-6 border-t" : "pt-6"}>
               <CardTitle className="text-2xl">{project.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {project.companyBackground && (
+                <>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2 flex items-center"><Building className="mr-2 h-5 w-5 text-primary" /> Company Background</h3>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{project.companyBackground}</p>
+                  </div>
+                  <Separator />
+                </>
+              )}
               <div>
                 <h3 className="text-lg font-semibold mb-2">Project Description</h3>
                 <p className="text-muted-foreground whitespace-pre-wrap">{project.description}</p>
@@ -75,6 +85,39 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
                   <p className="text-muted-foreground">{project.timeline}</p>
                 </div>
               </div>
+              <Separator />
+              {project.projectGoals && project.projectGoals.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-2 flex items-center"><Target className="mr-2 h-5 w-5 text-primary" /> Project Goals</h3>
+                  <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                    {project.projectGoals.map((goal, index) => (
+                      <li key={index}>{goal}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {project.keyDeliverables && project.keyDeliverables.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2 flex items-center"><Milestone className="mr-2 h-5 w-5 text-primary" /> Key Deliverables</h3>
+                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                      {project.keyDeliverables.map((deliverable, index) => (
+                        <li key={index}>{deliverable}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+              {project.targetAudience && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2 flex items-center"><Users className="mr-2 h-5 w-5 text-primary" /> Target Audience</h3>
+                    <p className="text-muted-foreground">{project.targetAudience}</p>
+                  </div>
+                </>
+              )}
                <Separator />
               <div>
                 <h3 className="text-lg font-semibold mb-2 flex items-center"><ListChecks className="mr-2 h-5 w-5 text-primary" /> Required Skills</h3>
@@ -126,7 +169,7 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
               {matchedVendors.length > 0 ? (
                 <ul className="space-y-4">
                   {matchedVendors.map((vendor) => (
-                    <li key={vendor.id} className="flex items-start space-x-3 p-3 border rounded-md hover:bg-accent/50 transition-colors">
+                    <li key={vendor.id} className="flex items-start space-x-3 p-3 border rounded-md hover:bg-accent/10 transition-colors">
                       {vendor.imageUrl && <Image src={vendor.imageUrl} alt={vendor.name} width={48} height={48} className="rounded-full h-12 w-12 object-cover" data-ai-hint="person portrait"/>}
                       {!vendor.imageUrl && <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-lg font-semibold">{vendor.name.charAt(0)}</div>}
                       <div>
@@ -150,7 +193,7 @@ export default function ProjectDetailsPage({ params }: { params: { id: string } 
               )}
             </CardContent>
              <CardFooter>
-                <Button variant="link" className="w-full">View all vendor matches</Button>
+                <Button variant="link" className="w-full text-primary hover:text-primary/80">View all vendor matches</Button>
             </CardFooter>
           </Card>
         </div>

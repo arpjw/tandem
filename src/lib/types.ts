@@ -7,6 +7,11 @@ export interface Vendor {
   portfolioLinks: string[];
   aiGeneratedProfile?: string;
   imageUrl?: string;
+  yearsOfExperience?: number;
+  companySize?: 'Solo' | 'Small (2-10)' | 'Medium (11-50)' | 'Large (51+)';
+  industryFocus?: string[];
+  availability?: string; // e.g., "Available from Q3", "Part-time"
+  awardsAndCertifications?: string[];
 }
 
 export interface Project {
@@ -19,6 +24,10 @@ export interface Project {
   aiSuggestedSkills?: string[];
   aiSuggestedExperience?: string;
   imageUrl?: string;
+  projectGoals?: string[];
+  targetAudience?: string;
+  keyDeliverables?: string[];
+  companyBackground?: string; // Brief description of the company posting the project
 }
 
 export interface CommunicationMessage {
