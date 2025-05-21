@@ -42,7 +42,7 @@ const vendorFormSchema = z.object({
   projectHistory: z.array(projectHistorySchema).optional(),
   isVerified: z.boolean().default(false).optional(),
   naicsCodes: z.string().optional().describe("Comma-separated NAICS codes"),
-  dunsNumber: z.string().optional().regex(/^\d{9}$/, {message: "DUNS number must be 9 digits."}),
+  dunsNumber: z.string().regex(/^\d{9}$/, {message: "DUNS number must be 9 digits."}).optional().or(z.literal('')), // Corrected order and allow empty string
 
   portfolioLinks: z.string().url({ message: "Please enter a valid URL for portfolio." }).optional().or(z.literal('')),
   yearsOfExperience: z.coerce.number().min(0, "Years of experience must be 0 or more.").optional(),
