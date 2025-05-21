@@ -223,7 +223,19 @@ export default function NewVendorPage() {
                       <FormField control={form.control} name={`projectHistory.${index}.title`} render={({ field }) => ( <FormItem> <FormLabel>Project Title</FormLabel> <FormControl><Input placeholder="e.g., System Upgrade for Client X" {...field} /></FormControl><FormMessage /> </FormItem>)} />
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField control={form.control} name={`projectHistory.${index}.client`} render={({ field }) => ( <FormItem> <FormLabel>Client / Prime</FormLabel> <FormControl><Input placeholder="e.g., Major Corp Inc. / Gov Agency" {...field} /></FormControl><FormMessage /> </FormItem>)} />
-                        <FormField control={form.control} name={`projectHistory.${index}.year`} render={({ field }) => ( <FormItem> <FormLabel>Year Completed</FormLabel><FormControl><Input type="number" placeholder="e.g., 2022" {...field} /></FormControl><FormMessage /> </FormItem>)} />
+                        <FormField
+                          control={form.control}
+                          name={`projectHistory.${index}.year`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Year Completed</FormLabel>
+                              <FormControl>
+                                <Input type="number" placeholder="e.g., 2022" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
                       <FormField control={form.control} name={`projectHistory.${index}.description`} render={({ field }) => ( <FormItem> <FormLabel>Brief Description</FormLabel> <FormControl><Textarea placeholder="Role, responsibilities, key activities..." {...field} /></FormControl><FormMessage /> </FormItem>)} />
                       <FormField control={form.control} name={`projectHistory.${index}.outcome`} render={({ field }) => ( <FormItem> <FormLabel>Key Outcome / Result</FormLabel> <FormControl><Input placeholder="e.g., Achieved 20% cost savings" {...field} /></FormControl><FormMessage /> </FormItem>)} />
