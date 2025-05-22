@@ -65,7 +65,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an expert in analyzing project opportunities and requirements for Inertia, an AI-powered vendor matchmaking platform. Your role is to help businesses identify the ideal qualifications for vendor partners.
 
 Analyze the provided opportunity details. Based on this, you will:
-1.  Identify and list the most critical skills required. If none are apparent, return an empty array for suggestedSkills.
+1.  **Based on your analysis of the \`opportunityDescription\`, identify and list the key skills essential for successfully completing the work described.** This is your primary task for skill identification. Even if the user provides a list of skills in \`requiredSkillsInput\`, your \`suggestedSkills\` output should reflect your independent assessment of the full \`opportunityDescription\`. You can use the \`requiredSkillsInput\` as a reference or to augment your list if appropriate, but do not simply copy it. If the description does not yield any discernible skills, and \`requiredSkillsInput\` is also empty or unhelpful, then return an empty array for \`suggestedSkills\`.
 2.  Describe the ideal level and type of experience a vendor should have. If not clear, return an empty string for suggestedExperience.
 3.  Suggest relevant business or professional certifications (e.g., ISO 9001, specific technology certifications, PMP) that would make a vendor a strong candidate. If none are apparent, return an empty array for suggestedCertifications.
 4.  Pinpoint key compliance areas or regulations (e.g., GDPR, HIPAA, SOC 2, industry-specific standards) that are likely important. If none are apparent, return an empty array for keyComplianceAreas.
@@ -75,9 +75,9 @@ Opportunity Details:
 Description: {{{opportunityDescription}}}
 {{#if desiredBudget}}Budget: {{{desiredBudget}}}{{/if}}
 {{#if timeline}}Timeline: {{{timeline}}}{{/if}}
-{{#if requiredSkillsInput}}User-Provided Required Skills: {{{requiredSkillsInput}}}{{/if}}
+{{#if requiredSkillsInput}}User-Provided Required Skills (for reference): {{{requiredSkillsInput}}}{{/if}}
 {{#if diversityGoalsInput}}Stated Diversity Goals/Preferences: {{{diversityGoalsInput}}} (Note: While Inertia focuses on skills/experience, acknowledge these if stated, but focus primary suggestions on qualifications for the work itself.) {{/if}}
-{{#if complianceRequirementsInput}}User-Provided Compliance Needs: {{{complianceRequirementsInput}}}{{/if}}
+{{#if complianceRequirementsInput}}User-Provided Compliance Needs (for reference): {{{complianceRequirementsInput}}}{{/if}}
 
 Provide your analysis in the specified output format. Ensure all fields in the output schema are present, even if they are empty arrays or strings if no specific suggestions can be made.
 Focus on practical, actionable suggestions for finding qualified vendors.
@@ -95,12 +95,11 @@ const analyzeOpportunityFlow = ai.defineFlow(
     const genkitResponse = await prompt(input);
     if (!genkitResponse.output) {
       console.error("AI Analysis Error: Model did not return valid structured output for analyzeOpportunityFlow. Genkit Response:", genkitResponse);
-      // Consider returning a default or empty AnalyzeOpportunityOutput object or re-throwing a specific error
-      // For now, returning an empty object if output is null to satisfy the type, though this indicates an issue.
-      // A more robust solution might involve more nuanced error handling or retries.
-      // throw new Error("AI analysis failed to generate structured output. The model may have been unable to conform to the expected format, or there might be an issue with the AI service.");
-      return {}; // Return an empty object conforming to the now fully optional schema
+      // Return an empty object conforming to the now fully optional schema
+      // This indicates an issue but prevents a hard crash.
+      return {}; 
     }
     return genkitResponse.output;
   }
 );
+
