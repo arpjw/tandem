@@ -87,7 +87,12 @@ const analyzeOpportunityFlow = ai.defineFlow(
     outputSchema: AnalyzeOpportunityOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    const genkitResponse = await prompt(input);
+    if (!genkitResponse.output) {
+      console.error("AI Analysis Error: Model did not return valid structured output for analyzeOpportunityFlow. Genkit Response:", genkitResponse);
+      throw new Error("AI analysis failed to generate structured output. The model may have been unable to conform to the expected format, or there might be an issue with the AI service.");
+    }
+    return genkitResponse.output;
   }
 );
+
