@@ -20,6 +20,7 @@ import type { VendorProfileOutput } from '@/ai/flows/vendor-profile-generator';
 import { ArrowLeft, Loader2, Sparkles, Briefcase, Award, Building2, Clock, Layers, FileText, Users, ShieldCheck, PlusCircle, Trash2, Globe, Tag } from 'lucide-react';
 import { PageTitle } from '@/components/PageTitle';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 
 const companySizeEnum = z.enum(['Solo', 'Small (2-10)', 'Medium (11-50)', 'Large (51+)']);
 
@@ -92,15 +93,16 @@ export default function NewVendorPage() {
     const { name, businessDescription, expertise, services, certifications, industryFocus } = form.getValues();
     const projectHighlights = form.getValues("projectHistory")?.slice(0,2).map(p => p.title).join(', ');
 
-    if (!businessDescription || businessDescription.length < 20) {
+    if (!name || !businessDescription || businessDescription.length < 20) {
       toast({
-        title: "Error",
-        description: "Please provide a business name and description (at least 20 characters) to generate an AI summary.",
+        title: "Missing Information",
+        description: "Please provide a business name and a description (at least 20 characters) to use AI Profile Assist.",
         variant: "destructive",
       });
       return;
     }
     setIsAiLoading(true);
+    setAiProfile(null);
     try {
       const result = await generateVendorProfileSummary({ 
         businessName: name,
@@ -112,10 +114,6 @@ export default function NewVendorPage() {
         industryFocus
       });
       setAiProfile(result);
-      if(result.profileSummary) {
-        // Optionally set a form field with this, or just display it.
-        // form.setValue("aiGeneratedProfile", result.profileSummary); 
-      }
       toast({
         title: "AI Profile Assist Complete",
         description: "Review the AI-generated summary and keywords below.",
@@ -142,8 +140,7 @@ export default function NewVendorPage() {
       naicsCodes: data.naicsCodes?.split(',').map(s => s.trim()).filter(s => s) || [],
       industryFocus: data.industryFocus?.split(',').map(s => s.trim()).filter(s => s) || [],
       awardsAndCertifications: data.awardsAndCertificationsText?.split(',').map(s => s.trim()).filter(s => s) || [],
-      aiGeneratedProfile: aiProfile?.profileSummary, // Save the AI generated summary
-      // projectHistory is already in the correct array format
+      aiGeneratedProfile: aiProfile?.profileSummary,
     };
     console.log("Vendor data submitted:", processedData);
     // Simulate API call (e.g., add to mockVendors or send to backend)
@@ -210,7 +207,7 @@ export default function NewVendorPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    Project History / Past Performance
+                    <span className="flex items-center"><FileText className="mr-2 h-5 w-5 text-muted-foreground"/> Project History / Past Performance</span>
                     <Button type="button" size="sm" variant="outline" onClick={() => append({ title: '', client: '', description: '', outcome: '', year: new Date().getFullYear() -1 })}>
                       <PlusCircle className="mr-2 h-4 w-4" /> Add Project
                     </Button>
@@ -240,29 +237,32 @@ export default function NewVendorPage() {
                       {fields.length > 1 && <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-destructive hover:bg-destructive/10" onClick={() => remove(index)}> <Trash2 className="h-4 w-4" /> <span className="sr-only">Remove Project</span></Button>}
                     </div>
                   ))}
+                  {fields.length === 0 && <p className="text-sm text-muted-foreground">No project history added yet. Click "Add Project" to start.</p>}
                 </CardContent>
               </Card>
             </div>
 
-            <Card className="lg:col-span-1 self-start sticky top-4"> {/* AI Card */}
+            <Card className="lg:col-span-1 self-start sticky top-4">
               <CardHeader>
                 <CardTitle>AI Profile Assist</CardTitle>
                 <CardDescription>Generate a compelling summary and keywords for your profile using AI.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button type="button" onClick={handleGenerateProfile} disabled={isAiLoading || !form.watch('businessDescription')} className="w-full">
+                <Button type="button" onClick={handleGenerateProfile} disabled={isAiLoading || !form.watch('name') || !form.watch('businessDescription')} className="w-full">
                   {isAiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                   Generate with AI
                 </Button>
-                {aiProfile?.profileSummary && (
-                  <div className="mt-4 p-3 bg-secondary/50 rounded-md border space-y-3">
-                    <div>
-                      <h4 className="font-semibold mb-1 text-sm text-primary">AI Generated Summary:</h4>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{aiProfile.profileSummary}</p>
-                    </div>
+                {aiProfile && (
+                  <div className="mt-4 p-3 bg-secondary/30 rounded-md border space-y-3">
+                    {aiProfile.profileSummary && (
+                      <div>
+                        <h4 className="font-semibold mb-1 text-sm text-primary">AI Generated Summary:</h4>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{aiProfile.profileSummary}</p>
+                      </div>
+                    )}
                      {aiProfile.suggestedKeywords && aiProfile.suggestedKeywords.length > 0 && (
                         <div>
-                          <h4 className="font-semibold mb-1 text-sm text-primary">AI Suggested Keywords:</h4>
+                          <h4 className="font-semibold mb-1 text-sm text-primary mt-2">AI Suggested Keywords:</h4>
                            <div className="flex flex-wrap gap-1">
                             {aiProfile.suggestedKeywords.map(kw => (
                               <Badge key={kw} variant="outline">{kw}</Badge>
@@ -272,9 +272,12 @@ export default function NewVendorPage() {
                       )}
                     {aiProfile.readinessAssessment && (
                        <div>
-                          <h4 className="font-semibold mb-1 text-sm text-primary">AI Readiness Note:</h4>
+                          <h4 className="font-semibold mb-1 text-sm text-primary mt-2">AI Readiness Note:</h4>
                           <p className="text-xs text-muted-foreground italic whitespace-pre-wrap">{aiProfile.readinessAssessment}</p>
                         </div>
+                    )}
+                    { !aiProfile.profileSummary && (!aiProfile.suggestedKeywords || aiProfile.suggestedKeywords.length === 0) && !aiProfile.readinessAssessment && (
+                        <p className="text-sm text-muted-foreground">AI analysis did not return any specific suggestions. Try providing more details in your profile.</p>
                     )}
                   </div>
                 )}
@@ -296,5 +299,3 @@ export default function NewVendorPage() {
     </>
   );
 }
-
-    

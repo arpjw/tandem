@@ -56,8 +56,9 @@ Based on the information provided:
     *   Relevant certifications (especially any indicating specialization or quality standards like ISO).
     *   Experience suggested by project highlights or description.
     *   Overall suitability for partnering on various projects.
-2.  **Suggest Keywords**: List 5-10 specific keywords for search and matchmaking. Include specific skills, services, certifications (e.g., "Web Development", "Cybersecurity", "Logistics", "Java", "ISO 9001"), and industry terms.
-3.  **Readiness Assessment (Optional)**: Briefly assess the vendor's apparent readiness for projects. For example: "Strong certifications and clear expertise in X make them a promising candidate. Detailing project scale or team capacity could further strengthen their profile." or "Appears well-suited for Y type projects; adding specific project outcomes would be beneficial."
+    If you cannot generate a meaningful summary, return an empty string for profileSummary.
+2.  **Suggest Keywords**: List 5-10 specific keywords for search and matchmaking. Include specific skills, services, certifications (e.g., "Web Development", "Cybersecurity", "Logistics", "Java", "ISO 9001"), and industry terms. If no keywords can be suggested, return an empty array for suggestedKeywords.
+3.  **Readiness Assessment (Optional)**: Briefly assess the vendor's apparent readiness for projects. For example: "Strong certifications and clear expertise in X make them a promising candidate. Detailing project scale or team capacity could further strengthen their profile." or "Appears well-suited for Y type projects; adding specific project outcomes would be beneficial." If no assessment can be made, this field can be omitted or be an empty string.
 
 Focus on making the vendor attractive to businesses seeking reliable partners.
 The tone should be professional, confident, and clear.
@@ -72,7 +73,17 @@ const generateVendorProfileFlow = ai.defineFlow(
     outputSchema: VendorProfileOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    const genkitResponse = await prompt(input);
+    if (!genkitResponse.output) {
+      console.error("AI Profile Generation Error: Model did not return valid structured output. Input:", input, "Genkit Response:", genkitResponse);
+      // Return a default structure matching the schema
+      return {
+        profileSummary: '',
+        suggestedKeywords: [],
+        readinessAssessment: undefined, // or an empty string if preferred for optional fields
+      };
+    }
+    return genkitResponse.output;
   }
 );
+
