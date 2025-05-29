@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,14 @@ function ContractGenerationContent() {
 
   const opportunity = mockOpportunities.find(op => op.id === opportunityId);
   const supplier = mockSuppliers.find(sup => sup.id === supplierId);
+
+  const [currentDate, setCurrentDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Set the date only on the client-side after hydration
+    setCurrentDate(new Date().toLocaleDateString());
+  }, []);
+
 
   const handleFinalizeContract = () => {
     toast({
@@ -49,7 +57,6 @@ function ContractGenerationContent() {
     );
   }
   
-  // Placeholder: Buyer's company name. In a real app, this would come from the logged-in user's profile.
   const buyerCompanyName = "Prime Contract Solutions Inc."; 
 
   return (
@@ -70,7 +77,7 @@ function ContractGenerationContent() {
           <div className="p-6 border rounded-md bg-card min-h-[300px]">
             <h2 className="text-xl font-semibold mb-4 text-center">Subcontracting Agreement</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              This Subcontracting Agreement ("Agreement") is made and entered into as of {new Date().toLocaleDateString()}
+              This Subcontracting Agreement ("Agreement") is made and entered into as of {currentDate || '...'}
               by and between:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -99,7 +106,7 @@ function ContractGenerationContent() {
 
             <h3 className="font-semibold mb-2">3. Term:</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              The term of this Agreement shall commence on {new Date().toLocaleDateString()} and continue until project completion as per timeline <strong className="text-foreground">"{opportunity.timeline}"</strong>, unless terminated earlier in accordance with the provisions of this Agreement.
+              The term of this Agreement shall commence on {currentDate || '...'} and continue until project completion as per timeline <strong className="text-foreground">"{opportunity.timeline}"</strong>, unless terminated earlier in accordance with the provisions of this Agreement.
             </p>
             
             <p className="text-xs text-muted-foreground mt-6">
@@ -111,14 +118,12 @@ function ContractGenerationContent() {
             <div className="space-y-2">
               <label htmlFor="buyerSignature" className="text-sm font-medium">Buyer Signature:</label>
               <div className="h-12 border-b border-input bg-muted/30 rounded-t-md p-2">
-                {/* Placeholder for digital signature component or typed name */}
                  <p className="text-sm text-muted-foreground italic">Signed by {buyerCompanyName} representative</p>
               </div>
             </div>
             <div className="space-y-2">
               <label htmlFor="supplierSignature" className="text-sm font-medium">Supplier Signature:</label>
               <div className="h-12 border-b border-input bg-muted/30 rounded-t-md p-2">
-                {/* Placeholder for digital signature component or typed name */}
                 <p className="text-sm text-muted-foreground italic">Signed by {supplier.name} representative</p>
               </div>
             </div>
@@ -147,4 +152,3 @@ export default function ContractPage() {
         </Suspense>
     )
 }
-
