@@ -17,6 +17,8 @@ import { analyzeOpportunity } from '@/ai/flows/opportunity-analyzer';
 import type { AnalyzeOpportunityOutput } from '@/ai/flows/opportunity-analyzer';
 import { generateProposalFromInventory } from '@/ai/flows/proposal-generator';
 import type { AnalyzeInventoryOutput } from '@/ai/flows/inventory-analyzer';
+import { mockOpportunities } from '@/lib/mockData'; // Import mockOpportunities
+import type { Opportunity } from '@/lib/types'; // Import Opportunity type
 import { ArrowLeft, Loader2, Sparkles, ListChecks, Brain, Users, Target, Milestone, Building, ShieldCheck, Flag, Award } from 'lucide-react';
 import { PageTitle } from '@/components/PageTitle';
 import { Badge } from '@/components/ui/badge';
@@ -111,7 +113,8 @@ function NewOpportunityPageContent() {
       };
       generateAIOpportunityDraft();
     }
-  }, [buyerIndustryFromQuery, isFromAIGenerationPath, inventoryAnalysisString, form, toast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buyerIndustryFromQuery, isFromAIGenerationPath, inventoryAnalysisString, form.reset, form.setValue, toast]);
 
 
   const handleAnalyzeQualifications = async () => {
@@ -155,24 +158,36 @@ function NewOpportunityPageContent() {
   async function onSubmit(data: OpportunityFormValues) {
     setIsLoading(true);
     const opportunityId = `opp${Date.now()}`;
-    const processedData = {
-      ...data,
+    
+    const newOpportunity: Opportunity = {
       id: opportunityId,
+      title: data.title,
+      description: data.description,
+      budget: data.budget,
+      timeline: data.timeline,
       requiredSkills: data.requiredSkills.split(',').map(s => s.trim()).filter(s => s),
+      opportunityType: data.opportunityType,
       diversityGoals: data.diversityGoals?.split(',').map(s => s.trim()).filter(s => s).map(goalDesc => ({ type: goalDesc, description: goalDesc })) || [],
       complianceRequirements: data.complianceRequirements?.split(',').map(s => s.trim()).filter(s => s) || [],
+      setAsideStatus: data.setAsideStatus,
+      companyBackground: data.companyBackground,
       keyDeliverables: data.keyDeliverables?.split(',').map(s => s.trim()).filter(s => s) || [],
-      aiAnalysis: aiQualificationAnalysis,
       industry: data.buyerIndustry,
-      bids: [],
+      // Include AI analysis results if available
+      aiSuggestedSkills: aiQualificationAnalysis?.suggestedSkills,
+      aiSuggestedExperience: aiQualificationAnalysis?.suggestedExperience,
+      aiSuggestedVendorQualifications: `${aiQualificationAnalysis?.suggestedCertifications?.join(', ') || ''} ${aiQualificationAnalysis?.keyComplianceAreas?.join(', ') || ''}`, // Example combination
+      bids: [], // New opportunities start with no bids
+      // Add a placeholder imageUrl or leave it undefined
+      imageUrl: `https://placehold.co/600x400.png?text=${encodeURIComponent(data.title.substring(0, 20))}`
     };
 
-    console.log("Opportunity data submitted:", processedData);
-    // In a real app, save to mockData or backend
-    // This is a client component, so direct modification of mockData is not ideal here
-    // For demo, this part would be handled by a state management solution or API call
+    mockOpportunities.unshift(newOpportunity); // Add to the beginning of the array
 
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+    console.log("Opportunity data submitted and added to mockData:", newOpportunity);
+    
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call latency
+    
     toast({
       title: "Opportunity Posted",
       description: `"${data.title}" has been successfully posted.`,
@@ -362,3 +377,4 @@ export default function NewOpportunityPage() {
         </Suspense>
     )
 }
+
