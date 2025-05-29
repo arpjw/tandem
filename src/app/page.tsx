@@ -35,7 +35,7 @@ export default function LandingPage() {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              <p className="text-sm">
+              <p className="text-sm text-center">
                 Organizations looking to procure services or goods
                 <br />
                 (e.g., large enterprises, prime contractors).
@@ -53,7 +53,7 @@ export default function LandingPage() {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              <p className="text-sm">
+              <p className="text-sm text-center">
                 Businesses offering services or goods
                 <br />
                 (e.g., SMBs, subcontractors, vendors).
@@ -75,4 +75,3 @@ export default function LandingPage() {
     </TooltipProvider>
   );
 }
-
