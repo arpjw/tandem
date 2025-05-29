@@ -8,17 +8,19 @@ import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, DollarSign, CalendarDays, ListChecks, Brain, Users, MessageSquare, Target, Milestone, Building, ShieldCheck, Flag, Award, AlertTriangle, Briefcase, HandCoins, HelpCircle } from 'lucide-react';
-import { mockOpportunities, mockSuppliers } from '@/lib/mockData'; // Renamed to mockSuppliers
-import type { Opportunity, Supplier, OpportunityBid } from '@/lib/types'; // Renamed to Supplier
+import { ArrowLeft, Edit, DollarSign, CalendarDays, ListChecks, Brain, Users, MessageSquare, Target, Milestone, Building, ShieldCheck, Flag, Award, AlertTriangle, Briefcase, HandCoins, HelpCircle, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { mockOpportunities, mockSuppliers } from '@/lib/mockData'; 
+import type { Opportunity, Supplier, OpportunityBid } from '@/lib/types'; 
 import { PageTitle } from '@/components/PageTitle';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { useToast } from '@/hooks/use-toast';
 
 
 // Helper function to estimate max budget value (simplified)
-const getOpportunityMaxBudget = (budgetStr: string): number => {
+const getOpportunityMaxBudget = (budgetStr?: string): number => {
+  if (!budgetStr) return Infinity;
   const numbers = budgetStr.match(/\d+[\,\d+]*/g)?.map(s => parseInt(s.replace(/,/g, ''), 10)) || [];
   return numbers.length > 0 ? Math.max(...numbers) : Infinity;
 };
@@ -26,46 +28,51 @@ const getOpportunityMaxBudget = (budgetStr: string): number => {
 
 function OpportunityDetailsContent({ params }: { params: { id: string } }) {
   const searchParams = useSearchParams();
-  const isUserVerified = searchParams.get('verified') === 'true'; // Buyer's verification status
+  const { toast } = useToast();
+  const isUserVerified = searchParams.get('verified') === 'true'; // Buyer's verification status for interacting
 
   const opportunity = mockOpportunities.find(p => p.id === params.id);
 
   // Find suppliers who have bid on this opportunity
   const biddingSupplierIds = opportunity?.bids?.map(bid => bid.supplierId) || [];
   
-  // Simulate AI Matched Suppliers (can be refined later with actual AI logic)
-  // For now, take some suppliers, prioritize verified ones.
   const allSuppliers = mockSuppliers; 
 
-  const verifiedMatchedSuppliers = allSuppliers.filter(s => s.isVerified && 
+  // Simulate AI Matched Suppliers (prioritize verified ones, matching skills or diversity)
+  const verifiedMatchedSuppliers = allSuppliers.filter(s => 
+    s.isVerified && 
     (s.expertise.some(exp => opportunity?.requiredSkills.includes(exp)) || 
      opportunity?.diversityGoals?.some(dg => s.certifications?.includes(dg.type)))
-  ).slice(0, 3); // Limit for display
+  ).slice(0, 5); // Show a few matched ones
 
-  // For suppliers who haven't bid from the matched list
-  const verifiedMatchedSuppliersNotBid = verifiedMatchedSuppliers.filter(s => !biddingSupplierIds.includes(s.id));
-  
   // Get suppliers who have actually bid
   const suppliersWhoBid = allSuppliers.filter(s => biddingSupplierIds.includes(s.id));
 
-  // Combine them, ensuring verified bidders appear first, then other matched verified suppliers
+  // Combine them: bidding suppliers first, then other matched verified suppliers. Ensure uniqueness.
   const displaySuppliers = [
-    ...suppliersWhoBid.filter(s => s.isVerified),
-    ...verifiedMatchedSuppliersNotBid,
+    ...suppliersWhoBid, // Bidders first (verified or not, as they actively engaged)
+    ...verifiedMatchedSuppliers.filter(s => !biddingSupplierIds.includes(s.id)), // Then other matched verified ones who haven't bid
   ].filter((value, index, self) => index === self.findIndex((t) => (t.id === value.id))); // Unique list
 
 
-  // Provisional suppliers (not verified but potentially relevant)
-  const opportunityMaxBudget = opportunity ? getOpportunityMaxBudget(opportunity.budget) : Infinity;
+  // Provisional suppliers (not verified but potentially relevant for smaller contracts)
+  const opportunityMaxBudget = getOpportunityMaxBudget(opportunity?.budget);
   const showProvisionalSuppliers = opportunityMaxBudget <= 20000;
 
   const provisionalSuppliers = showProvisionalSuppliers ? 
     allSuppliers.filter(s => !s.isVerified && 
       (s.expertise.some(exp => opportunity?.requiredSkills.includes(exp)) || 
       opportunity?.diversityGoals?.some(dg => s.certifications?.includes(dg.type))) &&
-      !displaySuppliers.find(ds => ds.id === s.id) // Don't show if already in main list
-    ).slice(0, 2) // Limit provisional
+      !displaySuppliers.find(ds => ds.id === s.id) 
+    ).slice(0, 2) 
     : [];
+
+  const handleAskToBid = (supplierName: string) => {
+    toast({
+        title: "Request Sent (Simulated)",
+        description: `${supplierName} has been notified and asked to bid on this opportunity.`,
+    });
+  };
 
 
   if (!opportunity) {
@@ -77,13 +84,16 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
           The subcontracting opportunity you are looking for does not exist.
         </p>
         <Button asChild className="mt-4">
-          <Link href="/opportunities">
+          <Link href={`/opportunities${isUserVerified ? '?verified=true' : ''}`}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Opportunities
           </Link>
         </Button>
       </div>
     );
   }
+  
+  const fromNew = searchParams.get('from') === 'new';
+  const contractFinalized = searchParams.get('contract') === 'finalized';
 
   return (
     <>
@@ -95,21 +105,40 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
             <Button variant="outline" asChild>
               <Link href={`/opportunities${isUserVerified ? '?verified=true' : ''}`}><ArrowLeft className="mr-2 h-4 w-4" /> Back to Opportunities</Link>
             </Button>
-             <Button disabled> {/* Add href to edit page later, consider verification */}
+             <Button disabled> {/* Add href to edit page later, consider owner verification */}
               <Edit className="mr-2 h-4 w-4" /> Edit Opportunity
             </Button>
           </div>
         }
       />
 
-      {!isUserVerified && ( // This refers to the *current user's* (buyer's) verification for full access
+      {fromNew && (
+        <Alert variant="default" className="mb-6 bg-green-50 border-green-200">
+          <ThumbsUp className="h-4 w-4 text-green-600" />
+          <AlertTitle className="text-green-700">Opportunity Successfully Posted!</AlertTitle>
+          <AlertDescription className="text-green-600">
+            Your opportunity is now live. You can view matched suppliers below or share the link directly.
+          </AlertDescription>
+        </Alert>
+      )}
+      {contractFinalized && (
+         <Alert variant="default" className="mb-6 bg-green-50 border-green-200">
+          <Handshake className="h-4 w-4 text-green-600" />
+          <AlertTitle className="text-green-700">Contract Finalized!</AlertTitle>
+          <AlertDescription className="text-green-600">
+            The agreement for this opportunity has been finalized.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!isUserVerified && ( 
         <Alert variant="destructive" className="mb-6">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Verification May Be Required for Full Actions</AlertTitle>
           <AlertDescription>
             As a buyer, some actions like accepting bids might require your own profile verification.
             Suppliers must be verified to be fully matched.
-            {/* Placeholder for buyer verification link if that's a feature */}
+            {/* Placeholder for buyer verification link */}
           </AlertDescription>
         </Alert>
       )}
@@ -127,138 +156,24 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
               {opportunity.setAsideStatus && <Badge variant="outline" className="mt-2 w-fit text-sm py-1 px-3">{opportunity.setAsideStatus}</Badge>}
             </CardHeader>
             <CardContent className="space-y-6">
-              {opportunity.companyBackground && (
-                <>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2 flex items-center"><Building className="mr-2 h-5 w-5 text-primary" /> Posting Organization Background</h3>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{opportunity.companyBackground}</p>
-                  </div>
-                  <Separator />
-                </>
-              )}
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Opportunity Description</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{opportunity.description}</p>
-              </div>
+              {opportunity.companyBackground && ( <> <div> <h3 className="text-lg font-semibold mb-2 flex items-center"><Building className="mr-2 h-5 w-5 text-primary" /> Posting Organization Background</h3> <p className="text-muted-foreground whitespace-pre-wrap">{opportunity.companyBackground}</p> </div> <Separator /> </> )}
+              <div> <h3 className="text-lg font-semibold mb-2">Opportunity Description</h3> <p className="text-muted-foreground whitespace-pre-wrap">{opportunity.description}</p> </div>
               <Separator />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="text-md font-semibold mb-2 flex items-center"><DollarSign className="mr-2 h-5 w-5 text-primary" /> Budget / Value</h4>
-                  <p className="text-muted-foreground">{opportunity.budget}</p>
-                </div>
-                <div>
-                  <h4 className="text-md font-semibold mb-2 flex items-center"><CalendarDays className="mr-2 h-5 w-5 text-primary" /> Timeline / Duration</h4>
-                  <p className="text-muted-foreground">{opportunity.timeline}</p>
-                </div>
+                <div> <h4 className="text-md font-semibold mb-2 flex items-center"><DollarSign className="mr-2 h-5 w-5 text-primary" /> Budget / Value</h4> <p className="text-muted-foreground">{opportunity.budget}</p> </div>
+                <div> <h4 className="text-md font-semibold mb-2 flex items-center"><CalendarDays className="mr-2 h-5 w-5 text-primary" /> Timeline / Duration</h4> <p className="text-muted-foreground">{opportunity.timeline}</p> </div>
               </div>
-               {opportunity.opportunityType && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2 flex items-center"><Briefcase className="mr-2 h-5 w-5 text-primary" /> Opportunity Type</h3>
-                    <p className="text-muted-foreground">{opportunity.opportunityType}</p>
-                  </div>
-                </>
-              )}
-              {opportunity.keyDeliverables && opportunity.keyDeliverables.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2 flex items-center"><Milestone className="mr-2 h-5 w-5 text-primary" /> Key Deliverables</h3>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                      {opportunity.keyDeliverables.map((deliverable, index) => (
-                        <li key={index}>{deliverable}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </>
-              )}
+               {opportunity.opportunityType && ( <> <Separator /> <div> <h3 className="text-lg font-semibold mb-2 flex items-center"><Briefcase className="mr-2 h-5 w-5 text-primary" /> Opportunity Type</h3> <p className="text-muted-foreground">{opportunity.opportunityType}</p> </div> </> )}
+              {opportunity.keyDeliverables && opportunity.keyDeliverables.length > 0 && ( <> <Separator /> <div> <h3 className="text-lg font-semibold mb-2 flex items-center"><Milestone className="mr-2 h-5 w-5 text-primary" /> Key Deliverables</h3> <ul className="list-disc list-inside text-muted-foreground space-y-1"> {opportunity.keyDeliverables.map((deliverable, index) => ( <li key={index}>{deliverable}</li> ))} </ul> </div> </> )}
                <Separator />
-              <div>
-                <h3 className="text-lg font-semibold mb-2 flex items-center"><ListChecks className="mr-2 h-5 w-5 text-primary" /> Required Skills & Capabilities</h3>
-                <div className="flex flex-wrap gap-2">
-                  {opportunity.requiredSkills.map((skill) => (
-                    <Badge key={skill} variant="secondary" className="text-sm px-3 py-1">{skill}</Badge>
-                  ))}
-                </div>
-              </div>
-
-              {opportunity.diversityGoals && opportunity.diversityGoals.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2 flex items-center"><Users className="mr-2 h-5 w-5 text-primary" /> Supplier Diversity Goals</h3>
-                    <div className="space-y-2">
-                      {opportunity.diversityGoals.map((goal, index) => (
-                        <div key={index} className="p-2 border rounded-md bg-muted/30">
-                          <p className="font-medium">{goal.type}
-                            {goal.percentage && <span className="ml-2 text-sm text-muted-foreground">({goal.percentage}% target)</span>}
-                          </p>
-                          {goal.description && <p className="text-xs text-muted-foreground">{goal.description}</p>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {opportunity.complianceRequirements && opportunity.complianceRequirements.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2 flex items-center"><ShieldCheck className="mr-2 h-5 w-5 text-primary" /> Compliance Requirements</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {opportunity.complianceRequirements.map((compliance, index) => (
-                        <Badge key={index} variant="outline" className="text-sm">{compliance}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {(opportunity.aiSuggestedSkills || opportunity.aiSuggestedExperience || opportunity.aiSuggestedVendorQualifications) && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2 flex items-center"><Brain className="mr-2 h-5 w-5 text-primary" /> AI Analysis & Insights</h3>
-                    <div className="space-y-4 p-4 bg-secondary/30 rounded-md border">
-                      {opportunity.aiSuggestedSkills && opportunity.aiSuggestedSkills.length > 0 && (
-                        <div>
-                          <h4 className="text-md font-semibold mb-1">AI Suggested Skills:</h4>
-                           <div className="flex flex-wrap gap-2">
-                            {opportunity.aiSuggestedSkills.map(skill => (
-                              <Badge key={skill} variant="default">{skill}</Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {opportunity.aiSuggestedExperience && (
-                        <div>
-                          <h4 className="text-md font-semibold mb-1 mt-2">AI Suggested Experience:</h4>
-                          <p className="text-sm text-muted-foreground whitespace-pre-wrap">{opportunity.aiSuggestedExperience}</p>
-                        </div>
-                      )}
-                      {opportunity.aiSuggestedVendorQualifications && (
-                        <div>
-                          <h4 className="text-md font-semibold mb-1 mt-2">AI Suggested Supplier Qualifications:</h4>
-                          <p className="text-sm text-muted-foreground whitespace-pre-wrap">{opportunity.aiSuggestedVendorQualifications}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </>
-              )}
+              <div> <h3 className="text-lg font-semibold mb-2 flex items-center"><ListChecks className="mr-2 h-5 w-5 text-primary" /> Required Skills & Capabilities</h3> <div className="flex flex-wrap gap-2"> {opportunity.requiredSkills.map((skill) => ( <Badge key={skill} variant="secondary" className="text-sm px-3 py-1">{skill}</Badge> ))} </div> </div>
+              {opportunity.diversityGoals && opportunity.diversityGoals.length > 0 && ( <> <Separator /> <div> <h3 className="text-lg font-semibold mb-2 flex items-center"><Users className="mr-2 h-5 w-5 text-primary" /> Supplier Diversity Goals</h3> <div className="space-y-2"> {opportunity.diversityGoals.map((goal, index) => ( <div key={index} className="p-2 border rounded-md bg-muted/30"> <p className="font-medium">{goal.type} {goal.percentage && <span className="ml-2 text-sm text-muted-foreground">({goal.percentage}% target)</span>} </p> {goal.description && <p className="text-xs text-muted-foreground">{goal.description}</p>} </div> ))} </div> </div> </> )}
+              {opportunity.complianceRequirements && opportunity.complianceRequirements.length > 0 && ( <> <Separator /> <div> <h3 className="text-lg font-semibold mb-2 flex items-center"><ShieldCheck className="mr-2 h-5 w-5 text-primary" /> Compliance Requirements</h3> <div className="flex flex-wrap gap-2"> {opportunity.complianceRequirements.map((compliance, index) => ( <Badge key={index} variant="outline" className="text-sm">{compliance}</Badge> ))} </div> </div> </> )}
+              {(opportunity.aiSuggestedSkills || opportunity.aiSuggestedExperience || opportunity.aiSuggestedVendorQualifications) && ( <> <Separator /> <div> <h3 className="text-lg font-semibold mb-2 flex items-center"><Brain className="mr-2 h-5 w-5 text-primary" /> AI Analysis & Insights</h3> <div className="space-y-4 p-4 bg-secondary/30 rounded-md border"> {opportunity.aiSuggestedSkills && opportunity.aiSuggestedSkills.length > 0 && ( <div> <h4 className="text-md font-semibold mb-1">AI Suggested Skills:</h4>  <div className="flex flex-wrap gap-2"> {opportunity.aiSuggestedSkills.map(skill => ( <Badge key={skill} variant="default">{skill}</Badge> ))} </div> </div> )} {opportunity.aiSuggestedExperience && ( <div> <h4 className="text-md font-semibold mb-1 mt-2">AI Suggested Experience:</h4> <p className="text-sm text-muted-foreground whitespace-pre-wrap">{opportunity.aiSuggestedExperience}</p> </div> )} {opportunity.aiSuggestedVendorQualifications && ( <div> <h4 className="text-md font-semibold mb-1 mt-2">AI Suggested Supplier Qualifications:</h4> <p className="text-sm text-muted-foreground whitespace-pre-wrap">{opportunity.aiSuggestedVendorQualifications}</p> </div> )} </div> </div> </> )}
             </CardContent>
             <CardFooter className="bg-muted/30 p-6 border-t">
                 <Button variant="default" size="lg" asChild={!isUserVerified} disabled={!isUserVerified}>
-                   {isUserVerified ? (
-                     <Link href={`#`}> {/* Link for Supplier to bid/apply, might differ for Buyer */}
-                       Bid
-                     </Link>
-                   ) : (
-                     <span>Bid</span> // Show text if button is disabled for non-verified user
-                   )
-                  }
+                   {isUserVerified ? ( <Link href={`#`}> Bid </Link> ) : ( <span>Bid</span> )}
                 </Button>
             </CardFooter>
           </Card>
@@ -267,8 +182,8 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
         <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center"><Award className="mr-2 h-5 w-5 text-primary" /> Matched Suppliers</CardTitle>
-              <CardDescription>Suppliers suggested or bidding on this opportunity.</CardDescription>
+              <CardTitle className="flex items-center"><Award className="mr-2 h-5 w-5 text-primary" /> Potential Suppliers</CardTitle>
+              <CardDescription>Suppliers who may be a good fit or have bid.</CardDescription>
             </CardHeader>
             <CardContent>
               {displaySuppliers.length > 0 ? (
@@ -282,6 +197,7 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
                         <div className="flex-1">
                           <Link href={`/suppliers/${supplier.id}?verified=${isUserVerified}&opportunityId=${opportunity.id}`} className="font-semibold text-primary hover:underline" prefetch={false}>
                             {supplier.name} {supplier.isVerified && <ShieldCheck className="inline h-4 w-4 ml-1 text-green-500" title="Verified Supplier"/>}
+                            {!supplier.isVerified && <Badge variant="outline" className="ml-1 text-xs border-amber-500 text-amber-600">Provisional</Badge>}
                           </Link>
                           <p className="text-xs text-muted-foreground line-clamp-2">{supplier.businessDescription}</p>
                           {supplier.certifications && supplier.certifications.length > 0 && (
@@ -291,11 +207,12 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
                           )}
                           <div className="mt-2 flex flex-col sm:flex-row gap-2 items-start">
                             {bid ? (
-                               <Badge variant="default" className="bg-green-100 text-green-700 border-green-300 hover:bg-green-200">
+                               <Badge variant="default" className="bg-green-100 text-green-700 border-green-300 hover:bg-green-200 py-1 px-2.5">
                                 Bid: ${bid.amount.toLocaleString()}
                                </Badge>
                             ) : (
-                              <Button variant="outline" size="sm" onClick={() => alert(`Asked ${supplier.name} to bid (simulated)`)} disabled={!isUserVerified}>
+                              supplier.isVerified && // Only show Ask to Bid for verified suppliers who haven't bid
+                              <Button variant="outline" size="sm" onClick={() => handleAskToBid(supplier.name)} disabled={!isUserVerified}>
                                 <HandCoins className="mr-1.5 h-3 w-3" /> Ask to Bid
                               </Button>
                             )}
@@ -311,18 +228,18 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
                   })}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground">No specific suppliers matched yet. AI matching is in progress or broaden criteria.</p>
+                <p className="text-sm text-muted-foreground">No specific suppliers matched or bidding yet. AI matching is in progress or broaden criteria.</p>
               )}
 
               {provisionalSuppliers.length > 0 && (
                 <>
                   <Separator className="my-4"/>
                   <h4 className="text-md font-semibold mb-2 flex items-center">
-                    Provisional Suppliers
+                    Other Potential Suppliers (Provisional)
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild><HelpCircle className="ml-1.5 h-4 w-4 text-muted-foreground"/></TooltipTrigger>
-                        <TooltipContent><p>Not fully verified, suitable for smaller value opportunities.</p></TooltipContent>
+                        <TooltipContent><p>Not fully verified, may be suitable for smaller value opportunities.</p></TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   </h4>
@@ -333,7 +250,7 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
                         {!supplier.imageUrl && <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-lg font-semibold">{supplier.name.charAt(0)}</div>}
                         <div className="flex-1">
                           <Link href={`/suppliers/${supplier.id}?verified=${isUserVerified}&opportunityId=${opportunity.id}`} className="font-semibold text-primary hover:underline" prefetch={false}>
-                            {supplier.name} <Badge variant="outline" className="ml-1 text-xs">Provisional</Badge>
+                            {supplier.name} <Badge variant="outline" className="ml-1 text-xs border-amber-500 text-amber-600">Provisional</Badge>
                           </Link>
                           <p className="text-xs text-muted-foreground line-clamp-2">{supplier.businessDescription}</p>
                            <div className="mt-2">
