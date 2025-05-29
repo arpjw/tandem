@@ -34,7 +34,7 @@ function OnboardingCompleteContent() {
              <p className="text-muted-foreground">Your initial profile setup is done.</p>
           )}
           <CardDescription>
-            You can now explore subcontracting opportunities and further enhance your supplier profile. {/* Renamed */}
+            You can now explore subcontracting opportunities and further enhance your supplier profile.
           </CardDescription>
         </CardContent>
         <CardFooter className="flex flex-col space-y-3">
@@ -45,9 +45,7 @@ function OnboardingCompleteContent() {
           >
             Explore Opportunities <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          <Button variant="outline" asChild className="w-full">
-            <Link href="/suppliers/new">Manage Your Supplier Profile</Link> {/* Path/Text Updated */}
-          </Button>
+          <Button variant="outline" asChild className="w-full"><Link href="/suppliers/new">Manage Your Supplier Profile</Link></Button>
         </CardFooter>
       </Card>
       <ProgressIndicator currentStep={3} totalSteps={3} />
@@ -55,7 +53,7 @@ function OnboardingCompleteContent() {
   );
 }
 
-export default function SupplierCompletePage() { // Renamed
+export default function SupplierCompletePage() {
   return (
     <Suspense fallback={<div>Loading completion status...</div>}>
       <OnboardingCompleteContent />
