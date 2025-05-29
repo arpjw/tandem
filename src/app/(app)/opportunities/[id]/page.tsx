@@ -4,11 +4,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react'; // Added useEffect, useState
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, DollarSign, CalendarDays, ListChecks, Brain, Users, MessageSquare, Target, Milestone, Building, ShieldCheck, Flag, Award, AlertTriangle, Briefcase, HandCoins, HelpCircle, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { ArrowLeft, Edit, DollarSign, CalendarDays, ListChecks, Brain, Users, MessageSquare, Target, Milestone, Building, ShieldCheck, Flag, Award, AlertTriangle, Briefcase, HandCoins, HelpCircle, ThumbsDown, ThumbsUp, Handshake } from 'lucide-react';
 import { mockOpportunities, mockSuppliers } from '@/lib/mockData'; 
 import type { Opportunity, Supplier, OpportunityBid } from '@/lib/types'; 
 import { PageTitle } from '@/components/PageTitle';
@@ -25,37 +25,47 @@ const getOpportunityMaxBudget = (budgetStr?: string): number => {
   return numbers.length > 0 ? Math.max(...numbers) : Infinity;
 };
 
+// Client-side component for formatting bid amount
+const BidAmountBadge = ({ amount }: { amount: number }) => {
+  const [formattedAmount, setFormattedAmount] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFormattedAmount(amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' }));
+  }, [amount]);
+
+  return (
+    <Badge variant="default" className="bg-green-100 text-green-700 border-green-300 hover:bg-green-200 py-1 px-2.5">
+      Bid: {formattedAmount || '...'}
+    </Badge>
+  );
+};
+
 
 function OpportunityDetailsContent({ params }: { params: { id: string } }) {
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const isUserVerified = searchParams.get('verified') === 'true'; // Buyer's verification status for interacting
+  const isUserVerified = searchParams.get('verified') === 'true'; 
 
   const opportunity = mockOpportunities.find(p => p.id === params.id);
 
-  // Find suppliers who have bid on this opportunity
   const biddingSupplierIds = opportunity?.bids?.map(bid => bid.supplierId) || [];
   
   const allSuppliers = mockSuppliers; 
 
-  // Simulate AI Matched Suppliers (prioritize verified ones, matching skills or diversity)
   const verifiedMatchedSuppliers = allSuppliers.filter(s => 
     s.isVerified && 
     (s.expertise.some(exp => opportunity?.requiredSkills.includes(exp)) || 
      opportunity?.diversityGoals?.some(dg => s.certifications?.includes(dg.type)))
-  ).slice(0, 5); // Show a few matched ones
+  ).slice(0, 5); 
 
-  // Get suppliers who have actually bid
   const suppliersWhoBid = allSuppliers.filter(s => biddingSupplierIds.includes(s.id));
 
-  // Combine them: bidding suppliers first, then other matched verified suppliers. Ensure uniqueness.
   const displaySuppliers = [
-    ...suppliersWhoBid, // Bidders first (verified or not, as they actively engaged)
-    ...verifiedMatchedSuppliers.filter(s => !biddingSupplierIds.includes(s.id)), // Then other matched verified ones who haven't bid
-  ].filter((value, index, self) => index === self.findIndex((t) => (t.id === value.id))); // Unique list
+    ...suppliersWhoBid, 
+    ...verifiedMatchedSuppliers.filter(s => !biddingSupplierIds.includes(s.id)), 
+  ].filter((value, index, self) => index === self.findIndex((t) => (t.id === value.id))); 
 
 
-  // Provisional suppliers (not verified but potentially relevant for smaller contracts)
   const opportunityMaxBudget = getOpportunityMaxBudget(opportunity?.budget);
   const showProvisionalSuppliers = opportunityMaxBudget <= 20000;
 
@@ -105,7 +115,7 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
             <Button variant="outline" asChild>
               <Link href={`/opportunities${isUserVerified ? '?verified=true' : ''}`}><ArrowLeft className="mr-2 h-4 w-4" /> Back to Opportunities</Link>
             </Button>
-             <Button disabled> {/* Add href to edit page later, consider owner verification */}
+             <Button disabled> 
               <Edit className="mr-2 h-4 w-4" /> Edit Opportunity
             </Button>
           </div>
@@ -138,7 +148,6 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
           <AlertDescription>
             As a buyer, some actions like accepting bids might require your own profile verification.
             Suppliers must be verified to be fully matched.
-            {/* Placeholder for buyer verification link */}
           </AlertDescription>
         </Alert>
       )}
@@ -207,11 +216,9 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
                           )}
                           <div className="mt-2 flex flex-col sm:flex-row gap-2 items-start">
                             {bid ? (
-                               <Badge variant="default" className="bg-green-100 text-green-700 border-green-300 hover:bg-green-200 py-1 px-2.5">
-                                Bid: ${bid.amount.toLocaleString()}
-                               </Badge>
+                               <BidAmountBadge amount={bid.amount} />
                             ) : (
-                              supplier.isVerified && // Only show Ask to Bid for verified suppliers who haven't bid
+                              supplier.isVerified && 
                               <Button variant="outline" size="sm" onClick={() => handleAskToBid(supplier.name)} disabled={!isUserVerified}>
                                 <HandCoins className="mr-1.5 h-3 w-3" /> Ask to Bid
                               </Button>
@@ -268,7 +275,9 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
               )}
             </CardContent>
              <CardFooter>
-                <Button variant="link" className="w-full text-primary hover:text-primary/80" disabled={!isUserVerified}>View all AI matches</Button>
+                <Button variant="link" asChild className="w-full text-primary hover:text-primary/80" disabled={!isUserVerified}>
+                   <Link href={`/suppliers?verified=${isUserVerified}`}>View all AI matches</Link>
+                </Button>
             </CardFooter>
           </Card>
         </div>
@@ -285,3 +294,5 @@ export default function OpportunityDetailsPage({ params }: { params: { id: strin
     </Suspense>
   );
 }
+
+    

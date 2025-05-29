@@ -1,7 +1,7 @@
 
-import type { Supplier, Opportunity, CommunicationMessage, Industry, OpportunityBid } from './types'; // Renamed Vendor to Supplier
+import type { Supplier, Opportunity, CommunicationMessage, Industry, OpportunityBid } from './types';
 
-export const mockSuppliers: Supplier[] = [ // Renamed mockVendors to mockSuppliers
+export const mockSuppliers: Supplier[] = [
   {
     id: 'smb1',
     name: 'TechSpark Innovations LLC',
@@ -55,7 +55,7 @@ export const mockSuppliers: Supplier[] = [ // Renamed mockVendors to mockSupplie
     services: ['Component Design', 'Stress Analysis', 'Prototyping'],
     certifications: ['woman-owned', 'AS9100D Certified'],
     capacitySummary: 'Team of 8 engineers, ITAR compliant facilities.',
-    isVerified: false, // Example of a non-verified supplier for "Provisional"
+    isVerified: false, 
     industry: 'Aerospace & Defense',
     naicsCodes: ['541330'],
     dunsNumber: '987654321',
@@ -66,14 +66,40 @@ export const mockSuppliers: Supplier[] = [ // Renamed mockVendors to mockSupplie
     industryFocus: ['Aerospace', 'Defense'],
     availability: 'Accepting new design projects.',
   },
+  {
+    id: 'smb4',
+    name: 'CyberGuard Solutions',
+    businessDescription: 'Focused cybersecurity consultancy providing penetration testing, risk assessments, and CMMC preparation services. WOSB certified.',
+    expertise: ['Cybersecurity', 'Penetration Testing', 'Risk Assessment', 'CMMC', 'HIPAA'],
+    services: ['Security Consulting', 'Compliance Audits', 'Incident Response Planning'],
+    certifications: ['woman-owned', 'CISSP', 'CISM'],
+    capacitySummary: 'Team of 5 senior consultants. Specializes in SMB and healthcare sectors.',
+    projectHistory: [
+      { title: 'Regional Hospital HIPAA Compliance Audit', client: 'Mid-Size Regional Hospital', description: 'Conducted comprehensive HIPAA security rule audit and provided remediation plan.', outcome: 'Client successfully passed external HIPAA audit post-remediation.', year: 2023 },
+    ],
+    isVerified: true,
+    industry: 'Information Technology (IT)',
+    naicsCodes: ['541512', '541611'],
+    imageUrl: 'https://placehold.co/600x400.png',
+    aiGeneratedProfile: 'CyberGuard Solutions, a WOSB, offers expert cybersecurity consulting with a focus on compliance for SMBs and healthcare. Their CISSP and CISM certified team delivers high-value services like penetration testing and CMMC prep, ensuring robust security postures for their clients.',
+    yearsOfExperience: 8,
+    companySize: 'Small (2-10)',
+    industryFocus: ['Healthcare IT', 'Small & Medium Businesses'],
+    availability: 'Available for consultations and project work.',
+  }
 ];
 
 const sampleBidsOpp1: OpportunityBid[] = [
   { supplierId: 'smb1', opportunityId: 'opp1', amount: 200000, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), status: 'pending' },
+  { supplierId: 'smb4', opportunityId: 'opp1', amount: 185000, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), status: 'pending' },
 ];
 const sampleBidsOpp2: OpportunityBid[] = [
-    { supplierId: 'smb2', opportunityId: 'opp2', amount: 450000, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), status: 'pending'},
-    { supplierId: 'smb3', opportunityId: 'opp2', amount: 18000, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), status: 'pending'} // for <20k example
+    { supplierId: 'smb2', opportunityId: 'opp2', amount: 17500, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), status: 'pending'},
+    { supplierId: 'smb3', opportunityId: 'opp2', amount: 18000, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), status: 'pending'},
+    { supplierId: 'smb1', opportunityId: 'opp2', amount: 19000, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 0.5), status: 'pending' },
+];
+const sampleBidsOpp3: OpportunityBid[] = [
+    { supplierId: 'smb2', opportunityId: 'opp3', amount: 750000, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), status: 'pending' },
 ];
 
 
@@ -102,7 +128,7 @@ export const mockOpportunities: Opportunity[] = [
     id: 'opp2',
     title: 'RFP: Manufacturing of Specialized Components for EV Charging Stations',
     description: 'Large manufacturing enterprise seeks proposals from small to medium-sized businesses for the production of custom-designed enclosures and mounting hardware for a new line of electric vehicle (EV) charging stations. High precision and quality control are critical.',
-    budget: '$15,000 - $19,000', // For <20k example
+    budget: '$15,000 - $19,000', 
     timeline: 'Long-term supply agreement',
     requiredSkills: ['Precision Machining', 'Sheet Metal Fabrication', 'Quality Control (ISO 9001)', 'Supply Chain Management'],
     opportunityType: 'RFP Response',
@@ -118,7 +144,7 @@ export const mockOpportunities: Opportunity[] = [
     id: 'opp3',
     title: 'Teaming: Logistics Support for National Disaster Relief Operations',
     description: 'Seeking logistics partners (trucking, warehousing) to team on a proposal for a large federal contract providing disaster relief logistics. Need partners with rapid deployment capabilities and experience in challenging environments.',
-    budget: 'TBD based on prime contract award',
+    budget: 'TBD based on prime contract award (Est. $500k-$1M for this portion)',
     timeline: 'Multi-year contract potential',
     requiredSkills: ['Freight Transportation', 'Warehouse Management', 'Inventory Control', 'Rapid Deployment'],
     opportunityType: 'Teaming Agreement',
@@ -130,7 +156,7 @@ export const mockOpportunities: Opportunity[] = [
     aiSuggestedVendorQualifications: 'Look for VOSB or HUBZone certifications, strong past performance in logistics, and evidence of a flexible, scalable operational capacity. Asset ownership (trucks, warehouses) is a plus.',
     companyBackground: 'RapidResponse Logistics is a prime contractor specializing in emergency management services.',
     industry: 'Transportation & Warehousing',
-    bids: [],
+    bids: sampleBidsOpp3,
   },
 ];
 
@@ -138,7 +164,7 @@ export const mockMessages: CommunicationMessage[] = [
     {
         id: 'msg1',
         opportunityId: 'opp1',
-        supplierId: 'smb1', // Renamed vendorId to supplierId
+        supplierId: 'smb1',
         sender: 'user', 
         timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
         content: 'Hello TechSpark, we are impressed with your 8(a) certification and cybersecurity experience for the Federal Agency Portal subcontract.'
@@ -146,15 +172,15 @@ export const mockMessages: CommunicationMessage[] = [
     {
         id: 'msg2',
         opportunityId: 'opp1',
-        supplierId: 'smb1', // Renamed vendorId to supplierId
-        sender: 'supplier', // Renamed vendor to supplier
+        supplierId: 'smb1',
+        sender: 'supplier',
         timestamp: new Date(Date.now() - 1000 * 60 * 55),
         content: 'Thank you for your interest! We are confident in our ability to meet the requirements. Would you be available for a capabilities briefing next week?'
     },
     {
         id: 'msg3',
         opportunityId: 'opp2',
-        supplierId: 'smb3', // Renamed vendorId to supplierId
+        supplierId: 'smb3',
         sender: 'user',
         timestamp: new Date(Date.now() - 1000 * 60 * 120),
         content: 'AeroPrecision, regarding the EV charging components RFP, can you detail your AS9100 quality processes?'
@@ -182,3 +208,5 @@ export const getSuggestedDocuments = (industry?: Industry | string): string[] =>
       return ['General Business License', 'Proof of Insurance', 'Company Overview/Capability Statement'];
   }
 };
+
+    
