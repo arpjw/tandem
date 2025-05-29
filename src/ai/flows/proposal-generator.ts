@@ -10,14 +10,14 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { AnalyzeInventoryOutputSchema } from '@/ai/schemas/inventory-schemas'; 
 
-export const GenerateProposalFromInventoryInputSchema = z.object({
+const GenerateProposalFromInventoryInputSchema = z.object({
   inventoryAnalysis: AnalyzeInventoryOutputSchema.describe("The output from the inventory analysis flow."),
   industry: z.string().describe("The industry of the buyer."),
   buyerCompanyName: z.string().optional().describe("The name of the buyer's company."),
 });
 export type GenerateProposalFromInventoryInput = z.infer<typeof GenerateProposalFromInventoryInputSchema>;
 
-export const GenerateProposalFromInventoryOutputSchema = z.object({
+const GenerateProposalFromInventoryOutputSchema = z.object({
   generatedOpportunityTitle: z.string().describe("A concise title for the subcontracting opportunity."),
   generatedOpportunityDescription: z.string().describe("A detailed description of the work needed, based on inventory shortages or needs."),
   suggestedSkills: z.array(z.string()).optional().describe("Skills likely required from a supplier."),
@@ -69,3 +69,4 @@ const proposalFromInventoryFlow = ai.defineFlow(
     return output;
   }
 );
+
