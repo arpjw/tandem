@@ -212,7 +212,7 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
             </CardContent>
             <CardFooter className="bg-muted/30 p-6 border-t">
                 <Button variant="default" size="lg" disabled={!isUserVerified}>
-                    Express Interest / Apply
+                    Bid
                 </Button>
             </CardFooter>
           </Card>
