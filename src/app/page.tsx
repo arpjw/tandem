@@ -29,7 +29,7 @@ export default function LandingPage() {
             <TooltipTrigger asChild>
               <Button asChild size="lg" className="w-full py-8 text-lg">
                 <Link href="/opportunities/new">
-                  Supplier
+                  Buyer
                   <HelpCircle className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -47,7 +47,7 @@ export default function LandingPage() {
             <TooltipTrigger asChild>
               <Button asChild size="lg" variant="secondary" className="w-full py-8 text-lg">
                  <Link href="/vendors/onboarding/industry">
-                  Vendor
+                  Supplier
                   <HelpCircle className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -56,7 +56,7 @@ export default function LandingPage() {
               <p className="text-sm">
                 Businesses offering services or goods
                 <br />
-                (e.g., SMBs, subcontractors).
+                (e.g., SMBs, subcontractors, vendors).
               </p>
             </TooltipContent>
           </Tooltip>
@@ -75,3 +75,4 @@ export default function LandingPage() {
     </TooltipProvider>
   );
 }
+
