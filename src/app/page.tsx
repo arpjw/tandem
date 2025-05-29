@@ -10,7 +10,7 @@ import Link from 'next/link';
 export default function LandingPage() {
   return (
     <TooltipProvider>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6 relative">
         <header className="absolute top-6 left-6">
           <Logo />
         </header>
@@ -63,7 +63,7 @@ export default function LandingPage() {
           </p>
         </main>
 
-        <footer className="absolute bottom-6 text-xs text-muted-foreground">
+        <footer className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground">
           &copy; {new Date().getFullYear()} Tandem. All rights reserved.
         </footer>
       </div>
