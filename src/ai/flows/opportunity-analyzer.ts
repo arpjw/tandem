@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview Analyzes project opportunities and suggests relevant vendor qualifications for the Inertia platform.
+ * @fileOverview Analyzes project opportunities and suggests relevant vendor qualifications for the Tandem platform.
  *
  * - analyzeOpportunity - A function that analyzes opportunity details.
  * - AnalyzeOpportunityInput - The input type for the analyzeOpportunity function.
@@ -62,7 +62,7 @@ const prompt = ai.definePrompt({
   name: 'analyzeOpportunityPrompt',
   input: {schema: AnalyzeOpportunityInputSchema},
   output: {schema: AnalyzeOpportunityOutputSchema},
-  prompt: `You are an expert in analyzing project opportunities and requirements for Inertia, an AI-powered vendor matchmaking platform. Your role is to help businesses identify the ideal qualifications for vendor partners.
+  prompt: `You are an expert in analyzing project opportunities and requirements for Tandem, an AI-powered vendor matchmaking platform. Your role is to help businesses identify the ideal qualifications for vendor partners.
 
 Analyze the provided opportunity details. Based on this, you will:
 1.  **Based on your analysis of the \`opportunityDescription\`, identify and list the key skills essential for successfully completing the work described.** This is your primary task for skill identification. Even if the user provides a list of skills in \`requiredSkillsInput\`, your \`suggestedSkills\` output should reflect your independent assessment of the full \`opportunityDescription\`. You can use the \`requiredSkillsInput\` as a reference or to augment your list if appropriate, but do not simply copy it. If the description does not yield any discernible skills, and \`requiredSkillsInput\` is also empty or unhelpful, then return an empty array for \`suggestedSkills\`.
@@ -76,7 +76,7 @@ Description: {{{opportunityDescription}}}
 {{#if desiredBudget}}Budget: {{{desiredBudget}}}{{/if}}
 {{#if timeline}}Timeline: {{{timeline}}}{{/if}}
 {{#if requiredSkillsInput}}User-Provided Required Skills (for reference): {{{requiredSkillsInput}}}{{/if}}
-{{#if diversityGoalsInput}}Stated Diversity Goals/Preferences: {{{diversityGoalsInput}}} (Note: While Inertia focuses on skills/experience, acknowledge these if stated, but focus primary suggestions on qualifications for the work itself.) {{/if}}
+{{#if diversityGoalsInput}}Stated Diversity Goals/Preferences: {{{diversityGoalsInput}}} (Note: While Tandem focuses on skills/experience, acknowledge these if stated, but focus primary suggestions on qualifications for the work itself.) {{/if}}
 {{#if complianceRequirementsInput}}User-Provided Compliance Needs (for reference): {{{complianceRequirementsInput}}}{{/if}}
 
 Provide your analysis in the specified output format. Ensure all fields in the output schema are present, even if they are empty arrays or strings if no specific suggestions can be made.
@@ -102,4 +102,3 @@ const analyzeOpportunityFlow = ai.defineFlow(
     return genkitResponse.output;
   }
 );
-

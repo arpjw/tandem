@@ -1,7 +1,7 @@
 md
-# Inertia
+# Tandem
 
-Inertia is an AI-powered matchmaking platform designed to connect businesses with the best vendors for their projects. It facilitates detailed vendor profiling, intelligent matching of vendors to project requirements, project posting by businesses, and a communication hub for collaboration.
+Tandem is an AI-powered matchmaking platform designed to connect businesses with the best vendors for their projects. It facilitates detailed vendor profiling, intelligent matching of vendors to project requirements, project posting by businesses, and a communication hub for collaboration.
 
 ## Core Features:
 

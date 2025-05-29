@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Inertia - AI-Powered Vendor Matching',
-  description: 'Inertia connects businesses with vendors using intelligent AI matching for project success.',
+  title: 'Tandem - AI-Powered Vendor Matching',
+  description: 'Tandem connects businesses with vendors using intelligent AI matching for project success.',
 };
 
 export default function RootLayout({

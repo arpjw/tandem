@@ -9,8 +9,8 @@ export default function DashboardPage() {
   return (
     <>
       <PageTitle 
-        title="Inertia Dashboard" 
-        description="Welcome to Inertia, your AI-powered vendor matchmaking platform." 
+        title="Tandem Dashboard" 
+        description="Welcome to Tandem, your AI-powered vendor matchmaking platform." 
       />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview Generates a compelling vendor profile summary for Inertia, focusing on matchmaking strengths.
+ * @fileOverview Generates a compelling vendor profile summary for Tandem, focusing on matchmaking strengths.
  *
  * - generateVendorProfileSummary - A function that generates a vendor profile summary.
  * - VendorProfileInput - The input type for the generateVendorProfileSummary function.
@@ -39,7 +39,7 @@ const prompt = ai.definePrompt({
   name: 'vendorProfileSummaryPrompt',
   input: {schema: VendorProfileInputSchema},
   output: {schema: VendorProfileOutputSchema},
-  prompt: `You are an expert profile writer for Inertia, an AI-powered matchmaking platform connecting businesses with suitable vendors for their projects. Your goal is to create a concise and impactful summary that highlights a vendor's strengths and suitability for these opportunities.
+  prompt: `You are an expert profile writer for Tandem, an AI-powered matchmaking platform connecting businesses with suitable vendors for their projects. Your goal is to create a concise and impactful summary that highlights a vendor's strengths and suitability for these opportunities.
 
 Vendor Information:
 Business Name: {{{businessName}}}
@@ -80,10 +80,9 @@ const generateVendorProfileFlow = ai.defineFlow(
       return {
         profileSummary: '',
         suggestedKeywords: [],
-        readinessAssessment: undefined, // or an empty string if preferred for optional fields
+        readinessAssessment: undefined, 
       };
     }
     return genkitResponse.output;
   }
 );
-
