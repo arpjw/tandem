@@ -11,15 +11,15 @@ export default function LandingPage() {
   return (
     <TooltipProvider>
       {/* Outermost container: full screen, centers its single child (the content_block) */}
-      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground p-6">
         {/* Inner container: holds all content, centers its own items, centers its text, and has padding */}
-        <div className="flex flex-col items-center text-center p-6">
+        <div className="flex flex-col items-center text-center">
           
-          <div className="mb-12">
+          <div className="mb-12 text-center">
             <Logo />
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-bold mb-12">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-12 text-center">
             Who are you?
           </h1>
 
@@ -27,7 +27,7 @@ export default function LandingPage() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button asChild size="lg" className="w-full py-8 text-lg">
-                  <Link href="/opportunities/new">
+                  <Link href="/buy/select-industry"> {/* Updated Link */}
                     Buyer
                     <HelpCircle className="ml-2 h-5 w-5" />
                   </Link>
@@ -45,7 +45,7 @@ export default function LandingPage() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button asChild size="lg" variant="secondary" className="w-full py-8 text-lg">
-                  <Link href="/vendors/onboarding/industry">
+                  <Link href="/suppliers/onboarding/industry"> {/* Updated Link for consistency */}
                     Supplier
                     <HelpCircle className="ml-2 h-5 w-5" />
                   </Link>

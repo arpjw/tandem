@@ -8,24 +8,64 @@ import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, DollarSign, CalendarDays, ListChecks, Brain, Users, MessageSquare, Target, Milestone, Building, ShieldCheck, Flag, Award, AlertTriangle, Briefcase } from 'lucide-react';
-import { mockOpportunities, mockVendors } from '@/lib/mockData';
-import type { Opportunity, Vendor } from '@/lib/types';
+import { ArrowLeft, Edit, DollarSign, CalendarDays, ListChecks, Brain, Users, MessageSquare, Target, Milestone, Building, ShieldCheck, Flag, Award, AlertTriangle, Briefcase, HandCoins, HelpCircle } from 'lucide-react';
+import { mockOpportunities, mockSuppliers } from '@/lib/mockData'; // Renamed to mockSuppliers
+import type { Opportunity, Supplier, OpportunityBid } from '@/lib/types'; // Renamed to Supplier
 import { PageTitle } from '@/components/PageTitle';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+
+
+// Helper function to estimate max budget value (simplified)
+const getOpportunityMaxBudget = (budgetStr: string): number => {
+  const numbers = budgetStr.match(/\d+[\,\d+]*/g)?.map(s => parseInt(s.replace(/,/g, ''), 10)) || [];
+  return numbers.length > 0 ? Math.max(...numbers) : Infinity;
+};
+
 
 function OpportunityDetailsContent({ params }: { params: { id: string } }) {
   const searchParams = useSearchParams();
-  const isUserVerified = searchParams.get('verified') === 'true';
+  const isUserVerified = searchParams.get('verified') === 'true'; // Buyer's verification status
 
   const opportunity = mockOpportunities.find(p => p.id === params.id);
 
-  const matchedVendors: Vendor[] = opportunity ? mockVendors.slice(0, 3).filter(v =>
-    (opportunity.diversityGoals && opportunity.diversityGoals.length > 0 ?
-      v.certifications?.some(cert => opportunity.diversityGoals?.map(dg => dg.type.toLowerCase()).includes(cert.toLowerCase())) : true) ||
-    (opportunity.requiredSkills.some(skill => v.expertise.includes(skill)))
-  ) : [];
+  // Find suppliers who have bid on this opportunity
+  const biddingSupplierIds = opportunity?.bids?.map(bid => bid.supplierId) || [];
+  
+  // Simulate AI Matched Suppliers (can be refined later with actual AI logic)
+  // For now, take some suppliers, prioritize verified ones.
+  const allSuppliers = mockSuppliers; 
+
+  const verifiedMatchedSuppliers = allSuppliers.filter(s => s.isVerified && 
+    (s.expertise.some(exp => opportunity?.requiredSkills.includes(exp)) || 
+     opportunity?.diversityGoals?.some(dg => s.certifications?.includes(dg.type)))
+  ).slice(0, 3); // Limit for display
+
+  // For suppliers who haven't bid from the matched list
+  const verifiedMatchedSuppliersNotBid = verifiedMatchedSuppliers.filter(s => !biddingSupplierIds.includes(s.id));
+  
+  // Get suppliers who have actually bid
+  const suppliersWhoBid = allSuppliers.filter(s => biddingSupplierIds.includes(s.id));
+
+  // Combine them, ensuring verified bidders appear first, then other matched verified suppliers
+  const displaySuppliers = [
+    ...suppliersWhoBid.filter(s => s.isVerified),
+    ...verifiedMatchedSuppliersNotBid,
+  ].filter((value, index, self) => index === self.findIndex((t) => (t.id === value.id))); // Unique list
+
+
+  // Provisional suppliers (not verified but potentially relevant)
+  const opportunityMaxBudget = opportunity ? getOpportunityMaxBudget(opportunity.budget) : Infinity;
+  const showProvisionalSuppliers = opportunityMaxBudget <= 20000;
+
+  const provisionalSuppliers = showProvisionalSuppliers ? 
+    allSuppliers.filter(s => !s.isVerified && 
+      (s.expertise.some(exp => opportunity?.requiredSkills.includes(exp)) || 
+      opportunity?.diversityGoals?.some(dg => s.certifications?.includes(dg.type))) &&
+      !displaySuppliers.find(ds => ds.id === s.id) // Don't show if already in main list
+    ).slice(0, 2) // Limit provisional
+    : [];
 
 
   if (!opportunity) {
@@ -62,20 +102,19 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
         }
       />
 
-      {!isUserVerified && (
+      {!isUserVerified && ( // This refers to the *current user's* (buyer's) verification for full access
         <Alert variant="destructive" className="mb-6">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Verification Required</AlertTitle>
+          <AlertTitle>Verification May Be Required for Full Actions</AlertTitle>
           <AlertDescription>
-            You must be a verified vendor to express interest or apply for this opportunity.
-            <Button variant="link" asChild className="p-0 h-auto ml-1 text-destructive hover:text-destructive/80">
-              <Link href="/vendors/onboarding/industry">Complete Verification</Link>
-            </Button>
+            As a buyer, some actions like accepting bids might require your own profile verification.
+            Suppliers must be verified to be fully matched.
+            {/* Placeholder for buyer verification link if that's a feature */}
           </AlertDescription>
         </Alert>
       )}
 
-      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 ${!isUserVerified ? 'blur-sm pointer-events-none' : ''}`}>
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8`}>
         <div className="lg:col-span-2 space-y-8">
           <Card>
              {opportunity.imageUrl && (
@@ -201,7 +240,7 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
                       )}
                       {opportunity.aiSuggestedVendorQualifications && (
                         <div>
-                          <h4 className="text-md font-semibold mb-1 mt-2">AI Suggested Vendor Qualifications:</h4>
+                          <h4 className="text-md font-semibold mb-1 mt-2">AI Suggested Supplier Qualifications:</h4>
                           <p className="text-sm text-muted-foreground whitespace-pre-wrap">{opportunity.aiSuggestedVendorQualifications}</p>
                         </div>
                       )}
@@ -211,8 +250,15 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
               )}
             </CardContent>
             <CardFooter className="bg-muted/30 p-6 border-t">
-                <Button variant="default" size="lg" disabled={!isUserVerified}>
-                    Bid
+                <Button variant="default" size="lg" asChild={!isUserVerified} disabled={!isUserVerified}>
+                   {isUserVerified ? (
+                     <Link href={`#`}> {/* Link for Supplier to bid/apply, might differ for Buyer */}
+                       Bid
+                     </Link>
+                   ) : (
+                     <span>Bid</span> // Show text if button is disabled for non-verified user
+                   )
+                  }
                 </Button>
             </CardFooter>
           </Card>
@@ -221,39 +267,87 @@ function OpportunityDetailsContent({ params }: { params: { id: string } }) {
         <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center"><Award className="mr-2 h-5 w-5 text-primary" /> Matched SMB Vendors</CardTitle>
-              <CardDescription>Vendors suggested for this opportunity by Tandem AI.</CardDescription>
+              <CardTitle className="flex items-center"><Award className="mr-2 h-5 w-5 text-primary" /> Matched Suppliers</CardTitle>
+              <CardDescription>Suppliers suggested or bidding on this opportunity.</CardDescription>
             </CardHeader>
             <CardContent>
-              {matchedVendors.length > 0 ? (
+              {displaySuppliers.length > 0 ? (
                 <ul className="space-y-4">
-                  {matchedVendors.map((vendor) => (
-                    <li key={vendor.id} className="flex items-start space-x-3 p-3 border rounded-md hover:bg-accent/10 transition-colors">
-                      {vendor.imageUrl && <Image src={vendor.imageUrl} alt={vendor.name} width={48} height={48} className="rounded-full h-12 w-12 object-cover" data-ai-hint="business team logo"/>}
-                      {!vendor.imageUrl && <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-lg font-semibold">{vendor.name.charAt(0)}</div>}
-                      <div>
-                        <Link href={`/vendors/${vendor.id}${isUserVerified ? '?verified=true' : ''}`} className="font-semibold text-primary hover:underline" prefetch={false}>
-                          {vendor.name} {vendor.isVerified && <ShieldCheck className="inline h-4 w-4 ml-1 text-green-500" title="Verified Vendor"/>}
-                        </Link>
-                        <p className="text-xs text-muted-foreground line-clamp-2">{vendor.businessDescription}</p>
-                        {vendor.certifications && vendor.certifications.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {vendor.certifications.slice(0,2).map(cert => <Badge key={cert} variant="secondary" className="text-xs">{cert}</Badge>)}
-                          </div>
-                        )}
-                        <div className="mt-2">
-                            <Button variant="outline" size="sm" asChild disabled={!isUserVerified}>
-                                <Link href={`/communication?opportunityId=${opportunity.id}&vendorId=${vendor.id}${isUserVerified ? '&verified=true' : ''}`}>
+                  {displaySuppliers.map((supplier) => {
+                    const bid = opportunity.bids?.find(b => b.supplierId === supplier.id && b.status === 'pending');
+                    return (
+                      <li key={supplier.id} className="flex items-start space-x-3 p-3 border rounded-md hover:bg-accent/10 transition-colors">
+                        {supplier.imageUrl && <Image src={supplier.imageUrl} alt={supplier.name} width={48} height={48} className="rounded-full h-12 w-12 object-cover" data-ai-hint="business team logo"/>}
+                        {!supplier.imageUrl && <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-lg font-semibold">{supplier.name.charAt(0)}</div>}
+                        <div className="flex-1">
+                          <Link href={`/suppliers/${supplier.id}?verified=${isUserVerified}&opportunityId=${opportunity.id}`} className="font-semibold text-primary hover:underline" prefetch={false}>
+                            {supplier.name} {supplier.isVerified && <ShieldCheck className="inline h-4 w-4 ml-1 text-green-500" title="Verified Supplier"/>}
+                          </Link>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{supplier.businessDescription}</p>
+                          {supplier.certifications && supplier.certifications.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {supplier.certifications.slice(0,2).map(cert => <Badge key={cert} variant="secondary" className="text-xs">{cert}</Badge>)}
+                            </div>
+                          )}
+                          <div className="mt-2 flex flex-col sm:flex-row gap-2 items-start">
+                            {bid ? (
+                               <Badge variant="default" className="bg-green-100 text-green-700 border-green-300 hover:bg-green-200">
+                                Bid: ${bid.amount.toLocaleString()}
+                               </Badge>
+                            ) : (
+                              <Button variant="outline" size="sm" onClick={() => alert(`Asked ${supplier.name} to bid (simulated)`)} disabled={!isUserVerified}>
+                                <HandCoins className="mr-1.5 h-3 w-3" /> Ask to Bid
+                              </Button>
+                            )}
+                            <Button variant="ghost" size="sm" asChild className="text-primary p-0 h-auto hover:bg-transparent">
+                                <Link href={`/communication?opportunityId=${opportunity.id}&supplierId=${supplier.id}${isUserVerified ? '&verified=true' : ''}`}>
                                     <MessageSquare className="mr-1.5 h-3 w-3" /> Message
                                 </Link>
                             </Button>
+                          </div>
                         </div>
-                      </div>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground">No specific vendors matched yet. AI matching is in progress or broaden criteria.</p>
+                <p className="text-sm text-muted-foreground">No specific suppliers matched yet. AI matching is in progress or broaden criteria.</p>
+              )}
+
+              {provisionalSuppliers.length > 0 && (
+                <>
+                  <Separator className="my-4"/>
+                  <h4 className="text-md font-semibold mb-2 flex items-center">
+                    Provisional Suppliers
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild><HelpCircle className="ml-1.5 h-4 w-4 text-muted-foreground"/></TooltipTrigger>
+                        <TooltipContent><p>Not fully verified, suitable for smaller value opportunities.</p></TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </h4>
+                  <ul className="space-y-4">
+                    {provisionalSuppliers.map((supplier) => (
+                       <li key={supplier.id} className="flex items-start space-x-3 p-3 border border-dashed rounded-md hover:bg-accent/10 transition-colors opacity-80">
+                        {supplier.imageUrl && <Image src={supplier.imageUrl} alt={supplier.name} width={48} height={48} className="rounded-full h-12 w-12 object-cover" data-ai-hint="business team logo"/>}
+                        {!supplier.imageUrl && <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-lg font-semibold">{supplier.name.charAt(0)}</div>}
+                        <div className="flex-1">
+                          <Link href={`/suppliers/${supplier.id}?verified=${isUserVerified}&opportunityId=${opportunity.id}`} className="font-semibold text-primary hover:underline" prefetch={false}>
+                            {supplier.name} <Badge variant="outline" className="ml-1 text-xs">Provisional</Badge>
+                          </Link>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{supplier.businessDescription}</p>
+                           <div className="mt-2">
+                            <Button variant="ghost" size="sm" asChild className="text-primary p-0 h-auto hover:bg-transparent">
+                                <Link href={`/communication?opportunityId=${opportunity.id}&supplierId=${supplier.id}${isUserVerified ? '&verified=true' : ''}`}>
+                                    <MessageSquare className="mr-1.5 h-3 w-3" /> Message
+                                </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </>
               )}
             </CardContent>
              <CardFooter>

@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,12 +13,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { analyzeOpportunity } from '@/ai/flows/opportunity-analyzer'; // Updated import
-import type { AnalyzeOpportunityOutput } from '@/ai/flows/opportunity-analyzer'; // Updated import
-import { ArrowLeft, Loader2, Sparkles, ListChecks, Brain, Users, Target, Milestone, Building, ShieldCheck, Flag } from 'lucide-react';
+import { analyzeOpportunity } from '@/ai/flows/opportunity-analyzer';
+import type { AnalyzeOpportunityOutput } from '@/ai/flows/opportunity-analyzer';
+import { ArrowLeft, Loader2, Sparkles, ListChecks, Brain, Users, Target, Milestone, Building, ShieldCheck, Flag, Award } from 'lucide-react';
 import { PageTitle } from '@/components/PageTitle';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ProgressIndicator } from '@/components/ui/ProgressIndicator'; // Added for buyer flow
 
 const opportunityFormSchema = z.object({
   title: z.string().min(5, { message: "Opportunity title must be at least 5 characters." }),
@@ -32,13 +33,23 @@ const opportunityFormSchema = z.object({
   setAsideStatus: z.string().optional().describe("e.g., SBA 8(a) Set-Aside, WOSB Set-Aside"),
   companyBackground: z.string().optional(),
   keyDeliverables: z.string().optional().describe("List key deliverables (comma-separated)."),
+  // Field for buyer's industry context if coming from that flow
+  buyerIndustry: z.string().optional(), 
 });
 
 type OpportunityFormValues = z.infer<typeof opportunityFormSchema>;
 
-export default function NewOpportunityPage() {
+function NewOpportunityPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+
+  const buyerIndustryFromQuery = searchParams.get('industry');
+  const inventoryAnalysisFromQuery = searchParams.get('inventoryAnalysis');
+  const source = searchParams.get('source'); // e.g., 'ai_inventory' or 'manual'
+  const isFromAIGeneration = source === 'ai_inventory' && inventoryAnalysisFromQuery;
+
+
   const [isLoading, setIsLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<AnalyzeOpportunityOutput | null>(null);
@@ -47,7 +58,7 @@ export default function NewOpportunityPage() {
     resolver: zodResolver(opportunityFormSchema),
     defaultValues: {
       title: '',
-      description: '',
+      description: isFromAIGeneration ? `Based on recent inventory analysis (needs: ${inventoryAnalysisFromQuery}), we are seeking suppliers for...` : '',
       budget: '',
       timeline: '',
       requiredSkills: '',
@@ -57,8 +68,22 @@ export default function NewOpportunityPage() {
       setAsideStatus: '',
       companyBackground: '',
       keyDeliverables: '',
+      buyerIndustry: buyerIndustryFromQuery || '',
     },
   });
+
+  useEffect(() => {
+    if (buyerIndustryFromQuery) {
+        form.setValue('buyerIndustry', buyerIndustryFromQuery);
+    }
+    if (isFromAIGeneration) {
+        // Placeholder: In a real app, you'd call a proposal generation AI flow here
+        // and populate more fields of the form.
+        // For now, we just prefill the description.
+        toast({ title: "AI Draft Started", description: "Proposal draft started from inventory analysis. Please review and complete."});
+    }
+  }, [buyerIndustryFromQuery, isFromAIGeneration, inventoryAnalysisFromQuery, form, toast]);
+
 
   const handleAnalyzeRequirements = async () => {
     const { description, budget, timeline, requiredSkills, diversityGoals, complianceRequirements } = form.getValues();
@@ -100,34 +125,50 @@ export default function NewOpportunityPage() {
 
   async function onSubmit(data: OpportunityFormValues) {
     setIsLoading(true);
-    // Process comma-separated strings into arrays
     const processedData = {
       ...data,
+      id: `opp${Date.now()}`, // Simulate ID generation
       requiredSkills: data.requiredSkills.split(',').map(s => s.trim()).filter(s => s),
-      diversityGoals: data.diversityGoals?.split(',').map(s => s.trim()).filter(s => s).map(goalDesc => ({ type: goalDesc, description: goalDesc })) || [], // Simplified for now
+      diversityGoals: data.diversityGoals?.split(',').map(s => s.trim()).filter(s => s).map(goalDesc => ({ type: goalDesc, description: goalDesc })) || [],
       complianceRequirements: data.complianceRequirements?.split(',').map(s => s.trim()).filter(s => s) || [],
       keyDeliverables: data.keyDeliverables?.split(',').map(s => s.trim()).filter(s => s) || [],
-      aiAnalysis, // Include AI analysis if generated
+      aiAnalysis, 
+      industry: data.buyerIndustry, // Storing the buyer's industry with the opportunity
+      bids: [], // Initialize with empty bids
     };
+    
+    // In a real app, you'd save this to mockData or a backend
+    // For now, log and toast
     console.log("Opportunity data submitted:", processedData);
-    // Simulate API call to save data (e.g., to mockOpportunities or a backend)
+    
+    // Simulate adding to mockOpportunities (not ideal for client component, but for demo)
+    // import { mockOpportunities } from '@/lib/mockData'; // This would be problematic here.
+    // mockOpportunities.push(processedData as any);
+
+
     await new Promise(resolve => setTimeout(resolve, 1000));
     toast({
       title: "Opportunity Posted",
       description: `"${data.title}" has been successfully posted.`,
     });
     setIsLoading(false);
-    router.push('/opportunities'); 
+    // If from buyer flow, navigate to the posted opportunity. Otherwise, to the list.
+    // This simulates posting and then viewing it.
+    router.push(`/opportunities/${processedData.id}?verified=true`); 
   }
+  
+  const currentStep = isFromAIGeneration ? 3 : (buyerIndustryFromQuery ? 3 : 1); // Adjust step based on flow
+  const totalSteps = buyerIndustryFromQuery ? 4 : 1; // 4 steps for full buyer flow
+
 
   return (
     <>
       <PageTitle 
-        title="Post New Opportunity"
-        description="Detail your subcontracting needs or RFP to find qualified SMBs."
+        title={isFromAIGeneration ? "Review AI Drafted Opportunity" : "Post New Opportunity"}
+        description={isFromAIGeneration ? "Review and refine the AI-generated proposal based on your inventory analysis." : "Detail your subcontracting needs or RFP to find qualified SMBs."}
         action={
            <Button variant="outline" asChild>
-            <Link href="/opportunities"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Opportunities</Link>
+            <Link href={buyerIndustryFromQuery ? `/buy/inventory-input?industry=${buyerIndustryFromQuery}` : "/opportunities"}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Link>
           </Button>
         }
       />
@@ -141,6 +182,9 @@ export default function NewOpportunityPage() {
                 <CardDescription>Provide comprehensive information about the subcontracting opportunity.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                 {buyerIndustryFromQuery && (
+                    <Badge>Industry Context: {buyerIndustryFromQuery}</Badge>
+                )}
                 <FormField
                   control={form.control}
                   name="title"
@@ -302,7 +346,7 @@ export default function NewOpportunityPage() {
             <Card className="lg:col-span-1">
               <CardHeader>
                 <CardTitle>AI Qualification Assist</CardTitle>
-                <CardDescription>Let AI suggest key qualifications and vendor attributes for this opportunity.</CardDescription>
+                <CardDescription>Let AI suggest key qualifications and supplier attributes for this opportunity.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button type="button" onClick={handleAnalyzeRequirements} disabled={isAiLoading || !form.watch('description')} className="w-full">
@@ -315,7 +359,7 @@ export default function NewOpportunityPage() {
                 </Button>
                 {aiAnalysis && (
                   <div className="mt-4 space-y-4">
-                    {aiAnalysis.suggestedSkills?.length > 0 && <div>
+                    {aiAnalysis.suggestedSkills && aiAnalysis.suggestedSkills.length > 0 && <div>
                       <h4 className="font-semibold mb-2 text-sm flex items-center"><ListChecks className="mr-2 h-4 w-4 text-primary" /> AI Suggested Skills:</h4>
                       <div className="flex flex-wrap gap-1">
                         {aiAnalysis.suggestedSkills.map(skill => (
@@ -327,7 +371,7 @@ export default function NewOpportunityPage() {
                       <h4 className="font-semibold mb-2 text-sm flex items-center"><Brain className="mr-2 h-4 w-4 text-primary" /> AI Suggested Experience:</h4>
                       <p className="text-sm text-muted-foreground whitespace-pre-wrap">{aiAnalysis.suggestedExperience}</p>
                     </div>}
-                     {aiAnalysis.suggestedCertifications?.length > 0 && <div>
+                     {aiAnalysis.suggestedCertifications && aiAnalysis.suggestedCertifications.length > 0 && <div>
                       <h4 className="font-semibold mb-2 text-sm flex items-center"><Award className="mr-2 h-4 w-4 text-primary" /> AI Suggested Certifications:</h4>
                        <div className="flex flex-wrap gap-1">
                         {aiAnalysis.suggestedCertifications.map(cert => (
@@ -335,7 +379,7 @@ export default function NewOpportunityPage() {
                         ))}
                       </div>
                     </div>}
-                    {aiAnalysis.keyComplianceAreas?.length > 0 && <div>
+                    {aiAnalysis.keyComplianceAreas && aiAnalysis.keyComplianceAreas.length > 0 && <div>
                       <h4 className="font-semibold mb-2 text-sm flex items-center"><ShieldCheck className="mr-2 h-4 w-4 text-primary" /> AI Key Compliance Areas:</h4>
                        <div className="flex flex-wrap gap-1">
                         {aiAnalysis.keyComplianceAreas.map(comp => (
@@ -343,7 +387,7 @@ export default function NewOpportunityPage() {
                         ))}
                       </div>
                     </div>}
-                     {aiAnalysis.potentialMatchKeywords?.length > 0 && <div>
+                     {aiAnalysis.potentialMatchKeywords && aiAnalysis.potentialMatchKeywords.length > 0 && <div>
                       <h4 className="font-semibold mb-2 text-sm flex items-center"><Target className="mr-2 h-4 w-4 text-primary" /> AI Match Keywords:</h4>
                        <div className="flex flex-wrap gap-1">
                         {aiAnalysis.potentialMatchKeywords.map(kw => (
@@ -358,16 +402,25 @@ export default function NewOpportunityPage() {
           </div>
           
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => router.push('/opportunities')}>
+            <Button type="button" variant="outline" onClick={() => router.back()}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Post Opportunity
+              {isFromAIGeneration ? "Refine & Post Opportunity" : "Post Opportunity"}
             </Button>
           </div>
         </form>
       </Form>
+      {buyerIndustryFromQuery && <ProgressIndicator currentStep={currentStep} totalSteps={totalSteps} />}
     </>
   );
+}
+
+export default function NewOpportunityPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <NewOpportunityPageContent />
+        </Suspense>
+    )
 }

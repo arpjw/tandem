@@ -10,73 +10,72 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Send, MessageSquare, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { mockMessages, mockOpportunities, mockVendors } from '@/lib/mockData';
-import type { CommunicationMessage, Opportunity, Vendor } from '@/lib/types';
+import { mockMessages, mockOpportunities, mockSuppliers } from '@/lib/mockData'; // Renamed to mockSuppliers
+import type { CommunicationMessage, Opportunity, Supplier } from '@/lib/types'; // Renamed to Supplier
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
 
 interface EnrichedMessage extends CommunicationMessage {
   opportunityTitle?: string;
-  vendorName?: string;
+  supplierName?: string; // Renamed
 }
 
 function CommunicationContent() {
   const searchParams = useSearchParams();
   const initialOpportunityId = searchParams.get('opportunityId');
-  const initialVendorId = searchParams.get('vendorId');
-  const isUserVerified = searchParams.get('verified') === 'true';
+  const initialSupplierId = searchParams.get('supplierId'); // Renamed
+  const isUserVerified = searchParams.get('verified') === 'true'; // Assuming this is buyer's verification for now
 
-  const [selectedConversation, setSelectedConversation] = useState<{ opportunityId: string, vendorId: string } | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<{ opportunityId: string, supplierId: string } | null>(null); // Renamed
   const [messages, setMessages] = useState<EnrichedMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
 
-  // Group messages by opportunityId and vendorId to create conversations
+  // Group messages by opportunityId and supplierId to create conversations
   const conversations = mockMessages.reduce((acc, msg) => {
-    const key = `${msg.opportunityId}-${msg.vendorId}`;
+    const key = `${msg.opportunityId}-${msg.supplierId}`; // Renamed
     if (!acc[key]) {
       const opportunity = mockOpportunities.find(p => p.id === msg.opportunityId);
-      const vendor = mockVendors.find(v => v.id === msg.vendorId);
+      const supplier = mockSuppliers.find(v => v.id === msg.supplierId); // Renamed
 
       const latestMessageForConvo = mockMessages
-        .filter(m => m.opportunityId === msg.opportunityId && m.vendorId === msg.vendorId)
+        .filter(m => m.opportunityId === msg.opportunityId && m.supplierId === msg.supplierId) // Renamed
         .sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
 
       acc[key] = {
         opportunityId: msg.opportunityId,
-        vendorId: msg.vendorId,
+        supplierId: msg.supplierId, // Renamed
         opportunityTitle: opportunity?.title || 'Unknown Opportunity',
-        vendorName: vendor?.name || 'Unknown Vendor',
+        supplierName: supplier?.name || 'Unknown Supplier', // Renamed
         lastMessage: latestMessageForConvo?.content || 'No messages yet.',
         lastMessageTimestamp: latestMessageForConvo?.timestamp || new Date(0),
-        isVendorVerified: vendor?.isVerified || false,
+        isSupplierVerified: supplier?.isVerified || false, // Renamed
       };
     }
     return acc;
-  }, {} as Record<string, { opportunityId: string, vendorId: string, opportunityTitle: string, vendorName: string, lastMessage: string, lastMessageTimestamp: Date, isVendorVerified: boolean }>);
+  }, {} as Record<string, { opportunityId: string, supplierId: string, opportunityTitle: string, supplierName: string, lastMessage: string, lastMessageTimestamp: Date, isSupplierVerified: boolean }>); // Renamed
 
   const uniqueConversations = Object.values(conversations).sort((a,b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
 
 
   useEffect(() => {
-    if (initialOpportunityId && initialVendorId) {
-      setSelectedConversation({ opportunityId: initialOpportunityId, vendorId: initialVendorId });
+    if (initialOpportunityId && initialSupplierId) {
+      setSelectedConversation({ opportunityId: initialOpportunityId, supplierId: initialSupplierId }); // Renamed
     } else if (uniqueConversations.length > 0 && !selectedConversation) {
-      // setSelectedConversation({ opportunityId: uniqueConversations[0].opportunityId, vendorId: uniqueConversations[0].vendorId });
-      // Don't auto-select if not verified.
+      // Don't auto-select if not verified (assuming this page is for buyers, their verification status matters)
     }
-  }, [initialOpportunityId, initialVendorId, uniqueConversations, selectedConversation]);
+  }, [initialOpportunityId, initialSupplierId, uniqueConversations, selectedConversation]); // Renamed
 
   useEffect(() => {
     if (selectedConversation && isUserVerified) {
       const filteredMessages = mockMessages
-        .filter(msg => msg.opportunityId === selectedConversation.opportunityId && msg.vendorId === selectedConversation.vendorId)
+        .filter(msg => msg.opportunityId === selectedConversation.opportunityId && msg.supplierId === selectedConversation.supplierId) // Renamed
         .map(msg => {
           const opportunity = mockOpportunities.find(p => p.id === msg.opportunityId);
-          const vendor = mockVendors.find(v => v.id === msg.vendorId);
+          const supplier = mockSuppliers.find(v => v.id === msg.supplierId); // Renamed
           return {
             ...msg,
             opportunityTitle: opportunity?.title || 'Unknown Opportunity',
-            vendorName: vendor?.name || 'Unknown Vendor',
+            supplierName: supplier?.name || 'Unknown Supplier', // Renamed
           };
         })
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
@@ -91,23 +90,23 @@ function CommunicationContent() {
     if (!newMessage.trim() || !selectedConversation || !isUserVerified) return;
 
     const opportunity = mockOpportunities.find(p => p.id === selectedConversation.opportunityId);
-    const vendor = mockVendors.find(v => v.id === selectedConversation.vendorId);
+    const supplier = mockSuppliers.find(v => v.id === selectedConversation.supplierId); // Renamed
 
     const msgToAdd: EnrichedMessage = {
       id: `msg${Date.now()}`,
       opportunityId: selectedConversation.opportunityId,
-      vendorId: selectedConversation.vendorId,
-      sender: 'user',
+      supplierId: selectedConversation.supplierId, // Renamed
+      sender: 'user', // Assuming 'user' is the buyer in this context
       content: newMessage.trim(),
       timestamp: new Date(),
       opportunityTitle: opportunity?.title,
-      vendorName: vendor?.name,
+      supplierName: supplier?.name, // Renamed
     };
 
-    mockMessages.push(msgToAdd);
+    mockMessages.push(msgToAdd); // Note: This modifies mockData directly. In a real app, use state/API.
     setMessages(prev => [...prev, msgToAdd]);
     setNewMessage('');
-    const convoKey = `${selectedConversation.opportunityId}-${selectedConversation.vendorId}`;
+    const convoKey = `${selectedConversation.opportunityId}-${selectedConversation.supplierId}`; // Renamed
     if(conversations[convoKey]) {
         conversations[convoKey].lastMessage = msgToAdd.content;
         conversations[convoKey].lastMessageTimestamp = msgToAdd.timestamp;
@@ -115,7 +114,7 @@ function CommunicationContent() {
   };
 
   const currentOpportunity = selectedConversation ? mockOpportunities.find(p => p.id === selectedConversation.opportunityId) : null;
-  const currentVendor = selectedConversation ? mockVendors.find(v => v.id === selectedConversation.vendorId) : null;
+  const currentSupplier = selectedConversation ? mockSuppliers.find(v => v.id === selectedConversation.supplierId) : null; // Renamed
 
   return (
     <>
@@ -124,15 +123,16 @@ function CommunicationContent() {
         description="Connect and collaborate with SMBs on subcontracting opportunities."
       />
 
-      {!isUserVerified && (
+      {!isUserVerified && ( // This verification check logic might need to be more specific (buyer vs supplier)
          <Alert variant="destructive" className="mb-6">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Verification Required</AlertTitle>
           <AlertDescription>
-            You must be a verified vendor to use the communication hub.
+            You must be a verified user to use the communication hub. If you are a supplier, please
             <Button variant="link" asChild className="p-0 h-auto ml-1 text-destructive hover:text-destructive/80">
-              <Link href="/vendors/onboarding/industry">Complete Verification</Link>
+              <Link href="/suppliers/onboarding/industry">Complete Verification</Link> {/* Path Updated */}
             </Button>
+            . Buyers may also need verification for certain actions.
           </AlertDescription>
         </Alert>
       )}
@@ -146,15 +146,15 @@ function CommunicationContent() {
             <CardContent className="p-0">
               {uniqueConversations.map(convo => (
                 <button
-                  key={`${convo.opportunityId}-${convo.vendorId}`}
-                  onClick={() => setSelectedConversation({ opportunityId: convo.opportunityId, vendorId: convo.vendorId })}
-                  className={`w-full text-left p-4 border-b hover:bg-muted/50 transition-colors ${selectedConversation?.opportunityId === convo.opportunityId && selectedConversation?.vendorId === convo.vendorId ? 'bg-muted shadow-inner' : ''}`}
+                  key={`${convo.opportunityId}-${convo.supplierId}`} // Renamed
+                  onClick={() => setSelectedConversation({ opportunityId: convo.opportunityId, supplierId: convo.supplierId })} // Renamed
+                  className={`w-full text-left p-4 border-b hover:bg-muted/50 transition-colors ${selectedConversation?.opportunityId === convo.opportunityId && selectedConversation?.supplierId === convo.supplierId ? 'bg-muted shadow-inner' : ''}`} // Renamed
                   disabled={!isUserVerified}
                 >
                   <p className="font-semibold">{convo.opportunityTitle}</p>
                   <p className="text-sm text-muted-foreground flex items-center">
-                    with {convo.vendorName}
-                    {convo.isVendorVerified && <ShieldCheck className="ml-1.5 h-4 w-4 text-green-500" title="Verified Vendor" />}
+                    with {convo.supplierName} {/* Renamed */}
+                    {convo.isSupplierVerified && <ShieldCheck className="ml-1.5 h-4 w-4 text-green-500" title="Verified Supplier" />} {/* Renamed */}
                   </p>
                   <p className="text-xs text-muted-foreground truncate mt-1">{convo.lastMessage}</p>
                    <p className="text-xs text-muted-foreground/70 mt-0.5">
@@ -164,18 +164,18 @@ function CommunicationContent() {
                   </p>
                 </button>
               ))}
-              {uniqueConversations.length === 0 && isUserVerified && <p className="p-4 text-sm text-muted-foreground">No conversations yet. Start by contacting a vendor about an opportunity.</p>}
+              {uniqueConversations.length === 0 && isUserVerified && <p className="p-4 text-sm text-muted-foreground">No conversations yet. Start by contacting a supplier about an opportunity.</p>} {/* Renamed */}
             </CardContent>
           </ScrollArea>
         </Card>
 
         <Card className="w-2/3 flex flex-col">
-          {selectedConversation && currentOpportunity && currentVendor && isUserVerified ? (
+          {selectedConversation && currentOpportunity && currentSupplier && isUserVerified ? ( // Renamed
             <>
               <CardHeader className="border-b">
                 <CardTitle className="flex items-center">
-                  Chat with {currentVendor.name}
-                  {currentVendor.isVerified && <ShieldCheck className="ml-2 h-5 w-5 text-green-500" title="Verified Vendor"/>}
+                  Chat with {currentSupplier.name} {/* Renamed */}
+                  {currentSupplier.isVerified && <ShieldCheck className="ml-2 h-5 w-5 text-green-500" title="Verified Supplier"/>} {/* Renamed */}
                 </CardTitle>
                 <CardDescription>Regarding opportunity: {currentOpportunity.title}</CardDescription>
               </CardHeader>
@@ -184,8 +184,8 @@ function CommunicationContent() {
                   <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`flex items-end gap-2 max-w-[70%] ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={msg.sender === 'user' ? 'https://placehold.co/100x100.png' : currentVendor.imageUrl || 'https://placehold.co/100x100.png'} data-ai-hint={msg.sender === 'user' ? 'prime contract manager' : 'vendor representative'} />
-                        <AvatarFallback>{msg.sender === 'user' ? 'ME' : currentVendor.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={msg.sender === 'user' ? 'https://placehold.co/100x100.png' : currentSupplier.imageUrl || 'https://placehold.co/100x100.png'} data-ai-hint={msg.sender === 'user' ? 'prime contract manager' : 'supplier representative'} /> {/* Renamed */}
+                        <AvatarFallback>{msg.sender === 'user' ? 'ME' : currentSupplier.name.charAt(0)}</AvatarFallback> {/* Renamed */}
                       </Avatar>
                       <div className={`p-3 rounded-lg shadow-sm ${msg.sender === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'}`}>
                         <p className="text-sm">{msg.content}</p>
@@ -221,7 +221,7 @@ function CommunicationContent() {
               <p className="text-muted-foreground">
                 {isUserVerified ? "Select a conversation to start chatting." : "Please verify your profile to access communications."}
               </p>
-              {uniqueConversations.length === 0 && isUserVerified && <p className="text-sm text-muted-foreground mt-2">Find an opportunity and contact a vendor to begin.</p>}
+              {uniqueConversations.length === 0 && isUserVerified && <p className="text-sm text-muted-foreground mt-2">Find an opportunity and contact a supplier to begin.</p>} {/* Renamed */}
             </CardContent>
           )}
         </Card>
@@ -237,4 +237,3 @@ export default function CommunicationPage() {
     </Suspense>
   )
 }
-

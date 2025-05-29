@@ -1,7 +1,7 @@
 
-import type { Vendor, Opportunity, CommunicationMessage, Industry } from './types';
+import type { Supplier, Opportunity, CommunicationMessage, Industry, OpportunityBid } from './types'; // Renamed Vendor to Supplier
 
-export const mockVendors: Vendor[] = [
+export const mockSuppliers: Supplier[] = [ // Renamed mockVendors to mockSuppliers
   {
     id: 'smb1',
     name: 'TechSpark Innovations LLC',
@@ -55,7 +55,7 @@ export const mockVendors: Vendor[] = [
     services: ['Component Design', 'Stress Analysis', 'Prototyping'],
     certifications: ['woman-owned', 'AS9100D Certified'],
     capacitySummary: 'Team of 8 engineers, ITAR compliant facilities.',
-    isVerified: false,
+    isVerified: false, // Example of a non-verified supplier for "Provisional"
     industry: 'Aerospace & Defense',
     naicsCodes: ['541330'],
     dunsNumber: '987654321',
@@ -67,6 +67,15 @@ export const mockVendors: Vendor[] = [
     availability: 'Accepting new design projects.',
   },
 ];
+
+const sampleBidsOpp1: OpportunityBid[] = [
+  { supplierId: 'smb1', opportunityId: 'opp1', amount: 200000, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), status: 'pending' },
+];
+const sampleBidsOpp2: OpportunityBid[] = [
+    { supplierId: 'smb2', opportunityId: 'opp2', amount: 450000, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), status: 'pending'},
+    { supplierId: 'smb3', opportunityId: 'opp2', amount: 18000, timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), status: 'pending'} // for <20k example
+];
+
 
 export const mockOpportunities: Opportunity[] = [
   {
@@ -82,16 +91,18 @@ export const mockOpportunities: Opportunity[] = [
     setAsideStatus: 'SBA 8(a) Competitive',
     imageUrl: 'https://placehold.co/600x400.png',
     aiSuggestedSkills: ['Splunk', 'Qualys', 'Penetration Testing', 'Security Operations Center (SOC)'],
-    aiSuggestedExperience: 'Vendor should have a strong track record supporting federal government cybersecurity initiatives, with demonstrable experience in FISMA compliance and managing security for public-facing systems. CMMC certification (Level 2 or higher) is a plus.',
-    aiSuggestedVendorQualifications: 'Ideal vendors will possess SBA 8(a) certification, relevant cybersecurity certifications (CISSP, CISM), and a portfolio of federal projects. Look for experience with specific government security frameworks.',
+    aiSuggestedExperience: 'Supplier should have a strong track record supporting federal government cybersecurity initiatives, with demonstrable experience in FISMA compliance and managing security for public-facing systems. CMMC certification (Level 2 or higher) is a plus.',
+    aiSuggestedVendorQualifications: 'Ideal suppliers will possess SBA 8(a) certification, relevant cybersecurity certifications (CISSP, CISM), and a portfolio of federal projects. Look for experience with specific government security frameworks.',
     companyBackground: 'GovServe Prime Inc. is a leading systems integrator for federal civilian agencies.',
     keyDeliverables: ['Monthly Vulnerability Reports', '24/7 Security Monitoring', 'Incident Response Plan Execution'],
+    industry: 'Information Technology (IT)',
+    bids: sampleBidsOpp1,
   },
   {
     id: 'opp2',
     title: 'RFP: Manufacturing of Specialized Components for EV Charging Stations',
     description: 'Large manufacturing enterprise seeks proposals from small to medium-sized businesses for the production of custom-designed enclosures and mounting hardware for a new line of electric vehicle (EV) charging stations. High precision and quality control are critical.',
-    budget: 'Volume-based pricing, est. $500k annual spend',
+    budget: '$15,000 - $19,000', // For <20k example
     timeline: 'Long-term supply agreement',
     requiredSkills: ['Precision Machining', 'Sheet Metal Fabrication', 'Quality Control (ISO 9001)', 'Supply Chain Management'],
     opportunityType: 'RFP Response',
@@ -100,6 +111,8 @@ export const mockOpportunities: Opportunity[] = [
     imageUrl: 'https://placehold.co/600x400.png',
     companyBackground: 'ElectroCharge Corp. is a major player in the EV infrastructure market, expanding rapidly.',
     keyDeliverables: ['Production parts meeting specifications', 'Quality assurance documentation', 'On-time delivery performance'],
+    industry: 'Manufacturing',
+    bids: sampleBidsOpp2,
   },
   {
     id: 'opp3',
@@ -116,6 +129,8 @@ export const mockOpportunities: Opportunity[] = [
     aiSuggestedExperience: 'Partners should have documented experience in disaster relief or emergency response logistics, capable of mobilizing resources quickly. Experience with government contracting and FEMA requirements is highly beneficial.',
     aiSuggestedVendorQualifications: 'Look for VOSB or HUBZone certifications, strong past performance in logistics, and evidence of a flexible, scalable operational capacity. Asset ownership (trucks, warehouses) is a plus.',
     companyBackground: 'RapidResponse Logistics is a prime contractor specializing in emergency management services.',
+    industry: 'Transportation & Warehousing',
+    bids: [],
   },
 ];
 
@@ -123,7 +138,7 @@ export const mockMessages: CommunicationMessage[] = [
     {
         id: 'msg1',
         opportunityId: 'opp1',
-        vendorId: 'smb1',
+        supplierId: 'smb1', // Renamed vendorId to supplierId
         sender: 'user', 
         timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
         content: 'Hello TechSpark, we are impressed with your 8(a) certification and cybersecurity experience for the Federal Agency Portal subcontract.'
@@ -131,15 +146,15 @@ export const mockMessages: CommunicationMessage[] = [
     {
         id: 'msg2',
         opportunityId: 'opp1',
-        vendorId: 'smb1',
-        sender: 'vendor',
+        supplierId: 'smb1', // Renamed vendorId to supplierId
+        sender: 'supplier', // Renamed vendor to supplier
         timestamp: new Date(Date.now() - 1000 * 60 * 55),
         content: 'Thank you for your interest! We are confident in our ability to meet the requirements. Would you be available for a capabilities briefing next week?'
     },
     {
         id: 'msg3',
         opportunityId: 'opp2',
-        vendorId: 'smb3',
+        supplierId: 'smb3', // Renamed vendorId to supplierId
         sender: 'user',
         timestamp: new Date(Date.now() - 1000 * 60 * 120),
         content: 'AeroPrecision, regarding the EV charging components RFP, can you detail your AS9100 quality processes?'

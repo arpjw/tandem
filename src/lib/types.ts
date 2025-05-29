@@ -1,11 +1,11 @@
 
-export interface Vendor { // Small Business / Vendor
+export interface Supplier { // Renamed from Vendor
   id: string;
   name: string; // Business Name
   businessDescription: string;
   expertise: string[]; // Core competencies / skills
   services: string[]; // Specific services offered
-  industry?: string; // Primary industry of the vendor
+  industry?: string; // Primary industry of the supplier (vendor)
 
   certifications?: string[]; // e.g., 'minority-owned', 'veteran-owned', 'SBA 8a', 'HUBZone'
   capacitySummary?: string; // e.g., "Handles projects up to $500k", "Team of 15 engineers"
@@ -25,43 +25,56 @@ export interface Vendor { // Small Business / Vendor
   imageUrl?: string;
   yearsOfExperience?: number;
   companySize?: 'Solo' | 'Small (2-10)' | 'Medium (11-50)' | 'Large (51+)';
-  industryFocus?: string[]; // This might be redundant if 'industry' is primary, or can be more specific sub-sectors
+  industryFocus?: string[]; 
   availability?: string;
-  awardsAndCertifications?: string[]; // Kept for additional accolades
+  awardsAndCertifications?: string[];
 }
 
-export interface Opportunity { // Formerly Project, now Subcontracting Opportunity / RFP
+export interface OpportunityBid {
+  supplierId: string;
+  opportunityId: string;
+  amount: number;
+  timestamp: Date;
+  status: 'pending' | 'accepted' | 'rejected';
+}
+
+export interface Opportunity {
   id: string;
   title: string;
-  description: string; // Detailed description of the work needed
+  description: string;
   budget: string;
   timeline: string;
-  requiredSkills: string[]; // Key skills/technologies needed from the subcontractor
+  requiredSkills: string[];
 
-  opportunityType?: string; // e.g., "Subcontract", "RFP Response", "Teaming Agreement"
-  diversityGoals?: Array<{ // Specific diversity requirements/goals
-    type: string; // e.g., "Minority-Owned Business", "Woman-Owned Small Business"
+  industry?: string; // Industry of the buyer posting the opportunity
+  inventoryData?: string; // Optional raw inventory data from buyer
+  aiInventoryAnalysis?: string; // Optional AI analysis of inventory
+
+  opportunityType?: string;
+  diversityGoals?: Array<{
+    type: string;
     percentage?: number;
     description?: string;
   }>;
-  complianceRequirements?: string[]; // e.g., "ITAR Compliant", "CMMC Level 2 Required"
-  setAsideStatus?: string; // e.g., "SBA 8(a) Set-Aside", "WOSB Set-Aside"
+  complianceRequirements?: string[];
+  setAsideStatus?: string;
 
-  aiSuggestedSkills?: string[]; // AI analysis output
-  aiSuggestedExperience?: string; // AI analysis output
-  aiSuggestedVendorQualifications?: string; // AI analysis output on vendor qualifications
+  aiSuggestedSkills?: string[];
+  aiSuggestedExperience?: string;
+  aiSuggestedVendorQualifications?: string; 
 
-  imageUrl?: string; // Optional image for the opportunity
-  companyBackground?: string; // Background of the prime contractor/enterprise posting
+  imageUrl?: string;
+  companyBackground?: string;
   keyDeliverables?: string[];
-  targetAudience?: string; // (If applicable, e.g., for a marketing subcontract)
+  targetAudience?: string; 
+  bids?: OpportunityBid[];
 }
 
 export interface CommunicationMessage {
   id: string;
-  sender: 'user' | 'vendor' | 'system'; // 'user' could be prime contractor, 'vendor' is SMB
-  opportunityId: string; // Changed from projectId
-  vendorId: string;
+  sender: 'user' | 'supplier' | 'system'; // 'user' could be prime contractor/buyer
+  opportunityId: string;
+  supplierId: string; // Renamed from vendorId
   timestamp: Date;
   content: string;
 }
