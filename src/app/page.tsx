@@ -14,17 +14,17 @@ export default function LandingPage() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-6 text-center">
 
         {/* Logo - will be at the top of the centered block */}
-        <div className="mb-12"> {/* Added margin for spacing */}
+        <div className="mb-12 text-center"> {/* Ensured text-center for the Logo's container */}
           <Logo />
         </div>
 
         {/* Question */}
-        <h1 className="text-4xl sm:text-5xl font-bold mb-12">
+        <h1 className="text-4xl sm:text-5xl font-bold mb-12 text-center"> {/* Ensured text-center for the H1 */}
           Who are you?
         </h1>
 
         {/* Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-md mb-16"> {/* Added margin */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-md mb-16"> {/* This div is centered by parent's items-center */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button asChild size="lg" className="w-full py-8 text-lg">
@@ -35,7 +35,7 @@ export default function LandingPage() {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              <p className="text-sm text-center">
+              <p className="text-sm text-center"> {/* Tooltip text already centered */}
                 Organizations looking to procure services or goods
                 <br />
                 (e.g., large enterprises, prime contractors).
@@ -53,7 +53,7 @@ export default function LandingPage() {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              <p className="text-sm text-center">
+              <p className="text-sm text-center"> {/* Tooltip text already centered */}
                 Businesses offering services or goods
                 <br />
                 (e.g., SMBs, subcontractors, vendors).
@@ -63,12 +63,12 @@ export default function LandingPage() {
         </div>
 
         {/* Tagline */}
-        <p className="text-muted-foreground max-w-lg mb-8"> {/* Added margin */}
+        <p className="text-muted-foreground max-w-lg mb-8 text-center"> {/* Tagline already centered */}
           Tandem is an AI-powered matchmaking platform designed to connect businesses with the best vendors for their projects.
         </p>
 
         {/* Copyright - now part of the centered block */}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground text-center"> {/* Copyright already centered */}
           &copy; {new Date().getFullYear()} Tandem. All rights reserved.
         </p>
       </div>
