@@ -8,7 +8,7 @@
  */
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { AnalyzeInventoryOutputSchema } from './inventory-analyzer'; // Corrected import path assumption
+import { AnalyzeInventoryOutputSchema } from '@/ai/schemas/inventory-schemas'; 
 
 export const GenerateProposalFromInventoryInputSchema = z.object({
   inventoryAnalysis: AnalyzeInventoryOutputSchema.describe("The output from the inventory analysis flow."),
