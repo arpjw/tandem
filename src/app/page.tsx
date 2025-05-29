@@ -11,9 +11,9 @@ export default function LandingPage() {
   return (
     <TooltipProvider>
       {/* Outermost container: full screen, centers its single child (the content_block) */}
-      <div className="flex items-center justify-center min-h-screen bg-background text-foreground p-6">
-        {/* Inner container: holds all content, centers its own items, and centers its text */}
-        <div className="flex flex-col items-center text-center">
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
+        {/* Inner container: holds all content, centers its own items, centers its text, and has padding */}
+        <div className="flex flex-col items-center text-center p-6">
           
           <div className="mb-12">
             <Logo />
@@ -61,11 +61,11 @@ export default function LandingPage() {
             </Tooltip>
           </div>
 
-          <p className="text-muted-foreground max-w-lg mb-8">
+          <p className="text-muted-foreground max-w-lg mb-8 text-center">
             Tandem is an AI-powered matchmaking platform designed to connect businesses with the best vendors for their projects.
           </p>
 
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground text-center">
             &copy; {new Date().getFullYear()} Tandem. All rights reserved.
           </p>
 
