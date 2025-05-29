@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react'; // Added useEffect and useState
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -8,12 +9,19 @@ import { HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LandingPage() {
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Set the year only on the client-side after hydration
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+
   return (
     <TooltipProvider>
       {/* Outermost container: full screen, centers its single child (the content_block) */}
-      <div className="flex items-center justify-center min-h-screen bg-background text-foreground p-6">
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
         {/* Inner container: holds all content, centers its own items, centers its text, and has padding */}
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center p-6">
           
           <div className="mb-12 text-center">
             <Logo />
@@ -27,7 +35,7 @@ export default function LandingPage() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button asChild size="lg" className="w-full py-8 text-lg">
-                  <Link href="/buy/select-industry"> {/* Updated Link */}
+                  <Link href="/buy/select-industry">
                     Buyer
                     <HelpCircle className="ml-2 h-5 w-5" />
                   </Link>
@@ -45,7 +53,7 @@ export default function LandingPage() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button asChild size="lg" variant="secondary" className="w-full py-8 text-lg">
-                  <Link href="/suppliers/onboarding/industry"> {/* Updated Link for consistency */}
+                  <Link href="/suppliers/onboarding/industry">
                     Supplier
                     <HelpCircle className="ml-2 h-5 w-5" />
                   </Link>
@@ -66,7 +74,7 @@ export default function LandingPage() {
           </p>
 
           <p className="text-xs text-muted-foreground text-center">
-            &copy; {new Date().getFullYear()} Tandem. All rights reserved.
+            &copy; {currentYear !== null ? currentYear : '...'} Tandem. All rights reserved.
           </p>
 
         </div> {/* End of inner content block */}
