@@ -36,7 +36,7 @@ const opportunityFormSchema = z.object({
   setAsideStatus: z.string().optional().describe("e.g., SBA 8(a) Set-Aside, WOSB Set-Aside"),
   companyBackground: z.string().optional(),
   keyDeliverables: z.string().optional().describe("List key deliverables (comma-separated)."),
-  buyerIndustry: z.string().optional(), 
+  buyerIndustry: z.string().optional(),
 });
 
 type OpportunityFormValues = z.infer<typeof opportunityFormSchema>;
@@ -48,7 +48,7 @@ function NewOpportunityPageContent() {
 
   const buyerIndustryFromQuery = searchParams.get('industry');
   const inventoryAnalysisString = searchParams.get('inventoryAnalysis');
-  const source = searchParams.get('source'); 
+  const source = searchParams.get('source');
   const isFromAIGenerationPath = source === 'ai_inventory' && inventoryAnalysisString;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -85,7 +85,7 @@ function NewOpportunityPageContent() {
         try {
           const inventoryAnalysis: AnalyzeInventoryOutput = JSON.parse(inventoryAnalysisString);
           const companyName = "Our Company"; // Placeholder, ideally fetched from user profile
-          
+
           const proposalOutput = await generateProposalFromInventory({
             inventoryAnalysis,
             industry: buyerIndustryFromQuery || 'Not specified',
@@ -127,9 +127,9 @@ function NewOpportunityPageContent() {
     setIsAiAnalyzingQualifications(true);
     setAiQualificationAnalysis(null);
     try {
-      const result = await analyzeOpportunity({ 
-        opportunityDescription: description, 
-        desiredBudget: budget, 
+      const result = await analyzeOpportunity({
+        opportunityDescription: description,
+        desiredBudget: budget,
         timeline,
         requiredSkillsInput: requiredSkills,
         diversityGoalsInput: diversityGoals,
@@ -154,7 +154,7 @@ function NewOpportunityPageContent() {
 
   async function onSubmit(data: OpportunityFormValues) {
     setIsLoading(true);
-    const opportunityId = `opp${Date.now()}`; 
+    const opportunityId = `opp${Date.now()}`;
     const processedData = {
       ...data,
       id: opportunityId,
@@ -162,30 +162,30 @@ function NewOpportunityPageContent() {
       diversityGoals: data.diversityGoals?.split(',').map(s => s.trim()).filter(s => s).map(goalDesc => ({ type: goalDesc, description: goalDesc })) || [],
       complianceRequirements: data.complianceRequirements?.split(',').map(s => s.trim()).filter(s => s) || [],
       keyDeliverables: data.keyDeliverables?.split(',').map(s => s.trim()).filter(s => s) || [],
-      aiAnalysis: aiQualificationAnalysis, 
+      aiAnalysis: aiQualificationAnalysis,
       industry: data.buyerIndustry,
-      bids: [], 
+      bids: [],
     };
-    
+
     console.log("Opportunity data submitted:", processedData);
     // In a real app, save to mockData or backend
     // This is a client component, so direct modification of mockData is not ideal here
     // For demo, this part would be handled by a state management solution or API call
-    
+
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
     toast({
       title: "Opportunity Posted",
       description: `"${data.title}" has been successfully posted.`,
     });
     setIsLoading(false);
-    router.push(`/opportunities/${opportunityId}?verified=true&from=new`); 
+    router.push(`/opportunities/${opportunityId}?verified=true&from=new`);
   }
-  
-  const currentStep = buyerIndustryFromQuery ? 3 : 1; 
-  const totalSteps = buyerIndustryFromQuery ? 4 : 1; 
 
-  const backLink = buyerIndustryFromQuery 
-    ? `/buy/inventory-input?industry=${encodeURIComponent(buyerIndustryFromQuery)}` 
+  const currentStep = buyerIndustryFromQuery ? 3 : 1;
+  const totalSteps = buyerIndustryFromQuery ? 4 : 1;
+
+  const backLink = buyerIndustryFromQuery
+    ? `/buy/inventory-input?industry=${encodeURIComponent(buyerIndustryFromQuery)}`
     : (source === 'ai_inventory' ? `/buy/inventory-input?industry=${encodeURIComponent(buyerIndustryFromQuery || '')}` : "/opportunities");
 
 
@@ -201,7 +201,7 @@ function NewOpportunityPageContent() {
 
   return (
     <>
-      <PageTitle 
+      <PageTitle
         title={isFromAIGenerationPath ? "Review AI Drafted Opportunity" : "Post New Opportunity"}
         description={isFromAIGenerationPath ? "Review and refine the AI-generated proposal. Complete all fields before posting." : "Detail your subcontracting needs or RFP to find qualified SMBs."}
         action={
@@ -210,7 +210,7 @@ function NewOpportunityPageContent() {
           </Button>
         }
       />
-      
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -232,21 +232,87 @@ function NewOpportunityPageContent() {
                         </AlertDescription>
                     </Alert>
                  )}
-                <FormField control={form.control} name="title" render={({ field }) => ( <FormItem> <FormLabel>Opportunity Title</FormLabel> <FormControl> <Input placeholder="e.g., Cybersecurity Services Subcontract" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="companyBackground" render={({ field }) => ( <FormItem> <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4 text-muted-foreground" /> Your Company/Organization Background (Optional)</FormLabel> <FormControl> <Textarea placeholder="Briefly describe your organization and the context of this opportunity..." className="min-h-[80px]" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="description" render={({ field }) => ( <FormItem> <FormLabel>Opportunity Description</FormLabel> <FormControl> <Textarea placeholder="Describe the scope of work, objectives, and specific needs..." className="min-h-[120px]" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={form.control} name="title" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Opportunity Title</FormLabel>
+                    <FormControl><Input placeholder="e.g., Cybersecurity Services Subcontract" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="companyBackground" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center"><Building className="mr-2 h-4 w-4 text-muted-foreground" /> Your Company/Organization Background (Optional)</FormLabel>
+                    <FormControl><Textarea placeholder="Briefly describe your organization and the context of this opportunity..." className="min-h-[80px]" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="description" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Opportunity Description</FormLabel>
+                    <FormControl><Textarea placeholder="Describe the scope of work, objectives, and specific needs..." className="min-h-[120px]" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField control={form.control} name="budget" render={({ field }) => ( <FormItem> <FormLabel>Budget / Estimated Value</FormLabel> <FormControl> <Input placeholder="e.g., $100,000 - $150,000" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                  <FormField control={form.control} name="timeline" render={({ field }) => ( <FormItem> <FormLabel>Timeline / Duration</FormLabel> <FormControl> <Input placeholder="e.g., 6 months, 1 year base + options" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
+                  <FormField control={form.control} name="budget" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Budget / Estimated Value</FormLabel>
+                      <FormControl><Input placeholder="e.g., $100,000 - $150,000" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="timeline" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Timeline / Duration</FormLabel>
+                      <FormControl><Input placeholder="e.g., 6 months, 1 year base + options" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                 </div>
-                 <FormField control={form.control} name="opportunityType" render={({ field }) => ( <FormItem> <FormLabel>Opportunity Type (Optional)</FormLabel> <FormControl> <Input placeholder="e.g., Subcontract, RFP Response, Teaming" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
+                 <FormField control={form.control} name="opportunityType" render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>Opportunity Type (Optional)</FormLabel>
+                     <FormControl><Input placeholder="e.g., Subcontract, RFP Response, Teaming" {...field} /></FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )} />
                 <Separator />
-                <FormField control={form.control} name="requiredSkills" render={({ field }) => ( <FormItem> <FormLabel className="flex items-center"><ListChecks className="mr-2 h-4 w-4 text-muted-foreground" /> Required Skills/Capabilities (comma-separated)</FormLabel> <FormControl> <Input placeholder="e.g., Java, AWS, Project Management, ISO 9001" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                 <FormField control={form.control} name="keyDeliverables" render={({ field }) => ( <FormItem> <FormLabel className="flex items-center"><Milestone className="mr-2 h-4 w-4 text-muted-foreground" /> Key Deliverables (comma-separated, Optional)</FormLabel> <FormControl> <Textarea placeholder="e.g., Monthly reports, Software module, Completed installation" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
+                <FormField control={form.control} name="requiredSkills" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center"><ListChecks className="mr-2 h-4 w-4 text-muted-foreground" /> Required Skills/Capabilities (comma-separated)</FormLabel>
+                    <FormControl><Input placeholder="e.g., Java, AWS, Project Management, ISO 9001" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                 <FormField control={form.control} name="keyDeliverables" render={({ field }) => (
+                   <FormItem>
+                     <FormLabel className="flex items-center"><Milestone className="mr-2 h-4 w-4 text-muted-foreground" /> Key Deliverables (comma-separated, Optional)</FormLabel>
+                     <FormControl><Textarea placeholder="e.g., Monthly reports, Software module, Completed installation" {...field} /></FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )} />
                 <Separator />
-                 <FormField control={form.control} name="diversityGoals" render={({ field }) => ( <FormItem> <FormLabel className="flex items-center"><Users className="mr-2 h-4 w-4 text-muted-foreground" /> Supplier Diversity Goals (comma-separated, Optional)</FormLabel> <FormControl> <Input placeholder="e.g., MBE participation, WOSB preferred, 20% VOSB target" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="complianceRequirements" render={({ field }) => ( <FormItem> <FormLabel className="flex items-center"><ShieldCheck className="mr-2 h-4 w-4 text-muted-foreground" /> Compliance Requirements (comma-separated, Optional)</FormLabel> <FormControl> <Input placeholder="e.g., ITAR, CMMC Level 2, HIPAA" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="setAsideStatus" render={({ field }) => ( <FormItem> <FormLabel className="flex items-center"><Flag className="mr-2 h-4 w-4 text-muted-foreground" /> Set-Aside Status (Optional)</FormLabel> <FormControl> <Input placeholder="e.g., SBA 8(a) Set-Aside, Unrestricted" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
+                 <FormField control={form.control} name="diversityGoals" render={({ field }) => (
+                   <FormItem>
+                     <FormLabel className="flex items-center"><Users className="mr-2 h-4 w-4 text-muted-foreground" /> Supplier Diversity Goals (comma-separated, Optional)</FormLabel>
+                     <FormControl><Input placeholder="e.g., MBE participation, WOSB preferred, 20% VOSB target" {...field} /></FormControl>
+                     <FormMessage />
+                   </FormItem>
+                 )} />
+                <FormField control={form.control} name="complianceRequirements" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center"><ShieldCheck className="mr-2 h-4 w-4 text-muted-foreground" /> Compliance Requirements (comma-separated, Optional)</FormLabel>
+                    <FormControl><Input placeholder="e.g., ITAR, CMMC Level 2, HIPAA" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="setAsideStatus" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center"><Flag className="mr-2 h-4 w-4 text-muted-foreground" /> Set-Aside Status (Optional)</FormLabel>
+                    <FormControl><Input placeholder="e.g., SBA 8(a) Set-Aside, Unrestricted" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
               </CardContent>
             </Card>
 
@@ -272,7 +338,7 @@ function NewOpportunityPageContent() {
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => router.back()}>
               Cancel
