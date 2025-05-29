@@ -1,20 +1,28 @@
 
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, DollarSign, CalendarDays, ListChecks, Brain, Users, MessageSquare, Target, Milestone, Building, ShieldCheck, Flag, Award } from 'lucide-react';
-import { mockOpportunities, mockVendors } from '@/lib/mockData'; // Opportunities instead of Projects
-import type { Opportunity, Vendor } from '@/lib/types'; // Opportunity instead of Project
+import { ArrowLeft, Edit, DollarSign, CalendarDays, ListChecks, Brain, Users, MessageSquare, Target, Milestone, Building, ShieldCheck, Flag, Award, AlertTriangle, Briefcase } from 'lucide-react';
+import { mockOpportunities, mockVendors } from '@/lib/mockData';
+import type { Opportunity, Vendor } from '@/lib/types';
 import { PageTitle } from '@/components/PageTitle';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
-export default function OpportunityDetailsPage({ params }: { params: { id: string } }) {
+function OpportunityDetailsContent({ params }: { params: { id: string } }) {
+  const searchParams = useSearchParams();
+  const isUserVerified = searchParams.get('verified') === 'true';
+
   const opportunity = mockOpportunities.find(p => p.id === params.id);
-  // Simulate matched vendors - in a real app this would be dynamic based on opportunity criteria
-  const matchedVendors: Vendor[] = opportunity ? mockVendors.slice(0, 3).filter(v => 
-    (opportunity.diversityGoals && opportunity.diversityGoals.length > 0 ? 
+
+  const matchedVendors: Vendor[] = opportunity ? mockVendors.slice(0, 3).filter(v =>
+    (opportunity.diversityGoals && opportunity.diversityGoals.length > 0 ?
       v.certifications?.some(cert => opportunity.diversityGoals?.map(dg => dg.type.toLowerCase()).includes(cert.toLowerCase())) : true) ||
     (opportunity.requiredSkills.some(skill => v.expertise.includes(skill)))
   ) : [];
@@ -39,22 +47,35 @@ export default function OpportunityDetailsPage({ params }: { params: { id: strin
 
   return (
     <>
-      <PageTitle 
+      <PageTitle
         title={opportunity.title}
         description={opportunity.companyBackground || "Detailed opportunity information and requirements."}
         action={
            <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link href="/opportunities"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Opportunities</Link>
+              <Link href={`/opportunities${isUserVerified ? '?verified=true' : ''}`}><ArrowLeft className="mr-2 h-4 w-4" /> Back to Opportunities</Link>
             </Button>
-             <Button> {/* Add href to edit page later */}
+             <Button disabled> {/* Add href to edit page later, consider verification */}
               <Edit className="mr-2 h-4 w-4" /> Edit Opportunity
             </Button>
           </div>
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {!isUserVerified && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Verification Required</AlertTitle>
+          <AlertDescription>
+            You must be a verified vendor to express interest or apply for this opportunity.
+            <Button variant="link" asChild className="p-0 h-auto ml-1 text-destructive hover:text-destructive/80">
+              <Link href="/vendors/onboarding/industry">Complete Verification</Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 ${!isUserVerified ? 'blur-sm pointer-events-none' : ''}`}>
         <div className="lg:col-span-2 space-y-8">
           <Card>
              {opportunity.imageUrl && (
@@ -155,7 +176,7 @@ export default function OpportunityDetailsPage({ params }: { params: { id: strin
                   </div>
                 </>
               )}
-              
+
               {(opportunity.aiSuggestedSkills || opportunity.aiSuggestedExperience || opportunity.aiSuggestedVendorQualifications) && (
                 <>
                   <Separator />
@@ -190,7 +211,7 @@ export default function OpportunityDetailsPage({ params }: { params: { id: strin
               )}
             </CardContent>
             <CardFooter className="bg-muted/30 p-6 border-t">
-                <Button variant="default" size="lg">
+                <Button variant="default" size="lg" disabled={!isUserVerified}>
                     Express Interest / Apply
                 </Button>
             </CardFooter>
@@ -201,7 +222,7 @@ export default function OpportunityDetailsPage({ params }: { params: { id: strin
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center"><Award className="mr-2 h-5 w-5 text-primary" /> Matched SMB Vendors</CardTitle>
-              <CardDescription>Vendors suggested for this opportunity by SubConnect AI.</CardDescription>
+              <CardDescription>Vendors suggested for this opportunity by Tandem AI.</CardDescription>
             </CardHeader>
             <CardContent>
               {matchedVendors.length > 0 ? (
@@ -211,7 +232,7 @@ export default function OpportunityDetailsPage({ params }: { params: { id: strin
                       {vendor.imageUrl && <Image src={vendor.imageUrl} alt={vendor.name} width={48} height={48} className="rounded-full h-12 w-12 object-cover" data-ai-hint="business team logo"/>}
                       {!vendor.imageUrl && <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-lg font-semibold">{vendor.name.charAt(0)}</div>}
                       <div>
-                        <Link href={`/vendors/${vendor.id}`} className="font-semibold text-primary hover:underline" prefetch={false}>
+                        <Link href={`/vendors/${vendor.id}${isUserVerified ? '?verified=true' : ''}`} className="font-semibold text-primary hover:underline" prefetch={false}>
                           {vendor.name} {vendor.isVerified && <ShieldCheck className="inline h-4 w-4 ml-1 text-green-500" title="Verified Vendor"/>}
                         </Link>
                         <p className="text-xs text-muted-foreground line-clamp-2">{vendor.businessDescription}</p>
@@ -221,8 +242,8 @@ export default function OpportunityDetailsPage({ params }: { params: { id: strin
                           </div>
                         )}
                         <div className="mt-2">
-                            <Button variant="outline" size="sm" asChild>
-                                <Link href={`/communication?opportunityId=${opportunity.id}&vendorId=${vendor.id}`}>
+                            <Button variant="outline" size="sm" asChild disabled={!isUserVerified}>
+                                <Link href={`/communication?opportunityId=${opportunity.id}&vendorId=${vendor.id}${isUserVerified ? '&verified=true' : ''}`}>
                                     <MessageSquare className="mr-1.5 h-3 w-3" /> Message
                                 </Link>
                             </Button>
@@ -236,11 +257,20 @@ export default function OpportunityDetailsPage({ params }: { params: { id: strin
               )}
             </CardContent>
              <CardFooter>
-                <Button variant="link" className="w-full text-primary hover:text-primary/80">View all AI matches</Button>
+                <Button variant="link" className="w-full text-primary hover:text-primary/80" disabled={!isUserVerified}>View all AI matches</Button>
             </CardFooter>
           </Card>
         </div>
       </div>
     </>
+  );
+}
+
+
+export default function OpportunityDetailsPage({ params }: { params: { id: string } }) {
+  return (
+    <Suspense fallback={<div>Loading opportunity details...</div>}>
+      <OpportunityDetailsContent params={params} />
+    </Suspense>
   );
 }

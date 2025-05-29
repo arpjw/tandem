@@ -1,30 +1,75 @@
 
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUpRight, PlusCircle, Briefcase as BriefcaseIcon, AlertTriangle } from 'lucide-react'; 
+import { ArrowUpRight, PlusCircle, Briefcase as BriefcaseIcon, AlertTriangle, Lock, CheckCircle } from 'lucide-react';
 import { mockOpportunities } from '@/lib/mockData';
 import type { Opportunity } from '@/lib/types';
 import { PageTitle } from '@/components/PageTitle';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-export default function OpportunitiesPage() {
+function OpportunitiesContent() {
+  const searchParams = useSearchParams();
+  const isUserVerified = searchParams.get('verified') === 'true';
   const opportunities: Opportunity[] = mockOpportunities;
+
+  const PageAction = () => (
+    <div className="flex items-center gap-3">
+      <Button asChild>
+        <Link href="/opportunities/new">
+          <PlusCircle className="mr-2 h-4 w-4" /> Post New Opportunity
+        </Link>
+      </Button>
+      {!isUserVerified ? (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" asChild className="border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive">
+                <Link href="/vendors/onboarding/industry">
+                  <Lock className="h-4 w-4" />
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>Get Verified to fully access opportunities!</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ) : (
+        <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white py-2 px-3">
+          <CheckCircle className="mr-1.5 h-4 w-4" /> Verified Access
+        </Badge>
+      )}
+    </div>
+  );
 
   return (
     <>
-      <PageTitle 
+      <PageTitle
         title="Subcontracting Opportunities"
         description="Browse and manage subcontracting opportunities and RFPs."
-        action={
-          <Button asChild>
-            <Link href="/opportunities/new">
-              <PlusCircle className="mr-2 h-4 w-4" /> Post New Opportunity
-            </Link>
-          </Button>
-        }
+        action={<PageAction />}
       />
+
+      {!isUserVerified && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Verification Required</AlertTitle>
+          <AlertDescription>
+            Please complete your vendor profile and verification to fully access and apply for opportunities.
+            <Button variant="link" asChild className="p-0 h-auto ml-1 text-destructive hover:text-destructive/80">
+              <Link href="/vendors/onboarding/industry">Start Verification</Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {opportunities.length === 0 ? (
          <div className="text-center py-12">
@@ -33,7 +78,7 @@ export default function OpportunitiesPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Enterprises and Prime Contractors: Get started by posting a new opportunity.
             <br />
-            Small Businesses: Check back soon for new listings.
+            Small Businesses: Check back soon for new listings, or complete your verification to see all available projects.
           </p>
           <Button asChild className="mt-4">
             <Link href="/opportunities/new">
@@ -42,24 +87,30 @@ export default function OpportunitiesPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className={`grid gap-6 md:grid-cols-2 lg:grid-cols-3 ${!isUserVerified ? 'opacity-50 pointer-events-none' : ''}`}>
           {opportunities.map((opportunity) => (
-            <Link key={opportunity.id} href={`/opportunities/${opportunity.id}`} className="block group">
-              <Card className="flex flex-col h-full transition-all duration-200 ease-in-out group-hover:shadow-xl group-hover:border-primary/50">
+            <Link
+              key={opportunity.id}
+              href={isUserVerified ? `/opportunities/${opportunity.id}?verified=true` : '#'}
+              className={`block group ${!isUserVerified ? 'cursor-not-allowed' : ''}`}
+              onClick={(e) => !isUserVerified && e.preventDefault()}
+              aria-disabled={!isUserVerified}
+            >
+              <Card className={`flex flex-col h-full transition-all duration-200 ease-in-out ${isUserVerified ? 'group-hover:shadow-xl group-hover:border-primary/50' : 'bg-muted/30 border-dashed'}`}>
                 <CardHeader>
                   {opportunity.imageUrl && (
                      <div className="relative h-40 w-full mb-4 rounded-md overflow-hidden">
-                      <Image 
-                        src={opportunity.imageUrl} 
-                        alt={opportunity.title} 
-                        layout="fill" 
-                        objectFit="cover"
-                        data-ai-hint="business collaboration contract" /* Updated hint */
-                        className="transition-transform duration-300 group-hover:scale-105"
+                      <Image
+                        src={opportunity.imageUrl}
+                        alt={opportunity.title}
+                        width={600}
+                        height={400}
+                        className={`object-cover transition-transform duration-300 ${isUserVerified ? 'group-hover:scale-105' : ''}`}
+                        data-ai-hint="business collaboration contract"
                       />
                     </div>
                   )}
-                  <CardTitle className="group-hover:text-primary transition-colors">{opportunity.title}</CardTitle>
+                  <CardTitle className={`${isUserVerified ? 'group-hover:text-primary' : 'text-muted-foreground/70'} transition-colors`}>{opportunity.title}</CardTitle>
                   {opportunity.setAsideStatus && <Badge variant="secondary" className="mt-1 w-fit">{opportunity.setAsideStatus}</Badge>}
                   <CardDescription className="line-clamp-3 mt-2">{opportunity.description}</CardDescription>
                 </CardHeader>
@@ -90,8 +141,8 @@ export default function OpportunitiesPage() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="ghost" size="sm" className="w-full text-primary group-hover:text-primary/80" tabIndex={-1}>
-                      View Details <ArrowUpRight className="ml-2 h-4 w-4" />
+                  <Button variant="ghost" size="sm" className={`w-full ${isUserVerified ? 'text-primary group-hover:text-primary/80' : 'text-muted-foreground'}`} tabIndex={-1} disabled={!isUserVerified}>
+                      View Details {isUserVerified && <ArrowUpRight className="ml-2 h-4 w-4" />}
                   </Button>
                 </CardFooter>
               </Card>
@@ -100,5 +151,13 @@ export default function OpportunitiesPage() {
         </div>
       )}
     </>
+  );
+}
+
+export default function OpportunitiesPage() {
+  return (
+    <Suspense fallback={<div>Loading opportunities...</div>}>
+      <OpportunitiesContent />
+    </Suspense>
   );
 }

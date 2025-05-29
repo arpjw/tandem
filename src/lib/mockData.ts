@@ -1,5 +1,5 @@
 
-import type { Vendor, Opportunity, CommunicationMessage } from './types';
+import type { Vendor, Opportunity, CommunicationMessage, Industry } from './types';
 
 export const mockVendors: Vendor[] = [
   {
@@ -15,6 +15,7 @@ export const mockVendors: Vendor[] = [
       { title: 'State Health Data Exchange Portal', client: 'State Government Agency', description: 'Developed secure data exchange portal meeting HIPAA compliance.', outcome: 'Enabled seamless data sharing for 50+ healthcare providers', year: 2021 },
     ],
     isVerified: true,
+    industry: 'Information Technology (IT)',
     naicsCodes: ['541511', '541512', '518210'],
     dunsNumber: '123456789',
     portfolioLinks: ['https://techspark.dev/casestudies'],
@@ -38,6 +39,7 @@ export const mockVendors: Vendor[] = [
       { title: 'University Science Building HVAC Retrofit', client: 'State University System (via Prime)', description: 'Managed HVAC system upgrade for a 5-story building.', outcome: 'Achieved 25% energy savings, completed on schedule.', year: 2023 },
     ],
     isVerified: true,
+    industry: 'Construction',
     naicsCodes: ['236220', '238220'],
     imageUrl: 'https://placehold.co/600x400.png',
     yearsOfExperience: 12,
@@ -54,6 +56,7 @@ export const mockVendors: Vendor[] = [
     certifications: ['woman-owned', 'AS9100D Certified'],
     capacitySummary: 'Team of 8 engineers, ITAR compliant facilities.',
     isVerified: false,
+    industry: 'Aerospace & Defense',
     naicsCodes: ['541330'],
     dunsNumber: '987654321',
     imageUrl: 'https://placehold.co/600x400.png',
@@ -119,18 +122,18 @@ export const mockOpportunities: Opportunity[] = [
 export const mockMessages: CommunicationMessage[] = [
     {
         id: 'msg1',
-        opportunityId: 'opp1', // Changed from projectId
+        opportunityId: 'opp1',
         vendorId: 'smb1',
-        sender: 'user', // Represents prime contractor
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), 
+        sender: 'user', 
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
         content: 'Hello TechSpark, we are impressed with your 8(a) certification and cybersecurity experience for the Federal Agency Portal subcontract.'
     },
     {
         id: 'msg2',
         opportunityId: 'opp1',
         vendorId: 'smb1',
-        sender: 'vendor', // Represents SMB
-        timestamp: new Date(Date.now() - 1000 * 60 * 55), 
+        sender: 'vendor',
+        timestamp: new Date(Date.now() - 1000 * 60 * 55),
         content: 'Thank you for your interest! We are confident in our ability to meet the requirements. Would you be available for a capabilities briefing next week?'
     },
     {
@@ -138,7 +141,29 @@ export const mockMessages: CommunicationMessage[] = [
         opportunityId: 'opp2',
         vendorId: 'smb3',
         sender: 'user',
-        timestamp: new Date(Date.now() - 1000 * 60 * 120), 
+        timestamp: new Date(Date.now() - 1000 * 60 * 120),
         content: 'AeroPrecision, regarding the EV charging components RFP, can you detail your AS9100 quality processes?'
     }
 ];
+
+export const getSuggestedDocuments = (industry?: Industry | string): string[] => {
+  if (!industry) return ['General Business License', 'Proof of Insurance'];
+  switch (industry) {
+    case 'Construction':
+      return ['Contractor License', 'Bonding Information', 'Safety Certifications (e.g., OSHA 30)', 'Liability Insurance'];
+    case 'Manufacturing':
+      return ['ISO 9001 Certification (if applicable)', 'Quality Control Manual', 'Equipment List', 'Supplier Diversity Certifications'];
+    case 'Professional, Scientific & Technical Services':
+      return ['Professional Licenses (e.g., PE, CPA)', 'Errors & Omissions Insurance', 'Case Studies/Portfolio', 'Resumes of Key Personnel'];
+    case 'Administrative & Support Services':
+      return ['Business License', 'Client Testimonials', 'Service Level Agreements (SLAs) examples', 'Proof of Insurance'];
+    case 'Transportation & Warehousing':
+      return ['DOT Number', 'MC Number', 'Hazmat Certifications (if applicable)', 'Vehicle/Fleet List', 'Warehouse Certifications'];
+    case 'Information Technology (IT)':
+      return ['Relevant Tech Certifications (e.g., AWS, Cisco, CompTIA)', 'Cybersecurity Policies (e.g., SOC 2 report)', 'Data Privacy Policy', 'Service Organization Control (SOC) reports'];
+    case 'Aerospace & Defense':
+      return ['AS9100/AS9110 Certification', 'ITAR Registration Confirmation', 'CMMC Certification (if applicable)', 'Facility Security Clearance (FCL) details'];
+    default:
+      return ['General Business License', 'Proof of Insurance', 'Company Overview/Capability Statement'];
+  }
+};

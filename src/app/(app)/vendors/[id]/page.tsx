@@ -1,16 +1,23 @@
 
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Edit, Globe, Briefcase, UsersIcon as Users, Building2, Clock, Award, Layers, Lightbulb, ShieldCheck, FileText, Star, CheckCircle, Tag, Landmark } from 'lucide-react';
+import { ArrowLeft, Edit, Globe, Briefcase, UsersIcon as Users, Building2, Clock, Award, Layers, Lightbulb, ShieldCheck, FileText, Star, CheckCircle, Tag, Landmark, MessageSquare, AlertTriangle } from 'lucide-react';
 import { mockVendors } from '@/lib/mockData';
 import type { Vendor } from '@/lib/types';
 import { PageTitle } from '@/components/PageTitle';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
-export default function VendorProfilePage({ params }: { params: { id: string } }) {
+function VendorProfileContent({ params }: { params: { id: string } }) {
+  const searchParams = useSearchParams();
+  const isCurrentUserVerified = searchParams.get('verified') === 'true';
   const vendor = mockVendors.find(v => v.id === params.id);
 
   if (!vendor) {
@@ -22,7 +29,7 @@ export default function VendorProfilePage({ params }: { params: { id: string } }
           The SMB vendor profile you are looking for does not exist.
         </p>
         <Button asChild className="mt-4">
-          <Link href="/vendors">
+          <Link href={`/vendors${isCurrentUserVerified ? '?verified=true' : ''}`}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Vendors
           </Link>
         </Button>
@@ -32,7 +39,7 @@ export default function VendorProfilePage({ params }: { params: { id: string } }
 
   return (
     <>
-      <PageTitle 
+      <PageTitle
         title={
           <div className="flex items-center gap-2">
             {vendor.name}
@@ -43,16 +50,29 @@ export default function VendorProfilePage({ params }: { params: { id: string } }
         action={
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <Link href="/vendors"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Vendors</Link>
+              <Link href={`/vendors${isCurrentUserVerified ? '?verified=true' : ''}`}><ArrowLeft className="mr-2 h-4 w-4" /> Back to Vendors</Link>
             </Button>
-            <Button asChild> {/* Add href to edit page later */}
-              <Link href={`/vendors/new?id=${vendor.id}`}> {/* Assuming new page handles edits */}
+            <Button asChild>
+              <Link href={`/vendors/new?id=${vendor.id}${isCurrentUserVerified ? '&verified=true' : ''}`}>
                 <Edit className="mr-2 h-4 w-4" /> Edit Profile
               </Link>
             </Button>
           </div>
         }
       />
+
+      {!vendor.isVerified && (
+        <Alert variant="warning" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Profile Incomplete or Unverified</AlertTitle>
+          <AlertDescription>
+            This vendor's profile may not be fully verified. If this is your profile, please complete the verification process.
+            <Button variant="link" asChild className="p-0 h-auto ml-1">
+               <Link href={`/vendors/onboarding/documents?industry=${encodeURIComponent(vendor.industry || '')}`}>Complete Verification</Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left Column */}
@@ -69,10 +89,11 @@ export default function VendorProfilePage({ params }: { params: { id: string } }
               <h2 className="text-xl font-semibold">{vendor.name}</h2>
               {vendor.isVerified && <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white w-fit"><CheckCircle className="mr-1.5 h-4 w-4"/> Verified SMB</Badge>}
 
+              {vendor.industry && <p className="text-sm text-muted-foreground flex items-center"><Briefcase className="mr-1.5 h-4 w-4 text-primary" />Industry: {vendor.industry}</p>}
               {vendor.companySize && <p className="text-sm text-muted-foreground flex items-center"><Building2 className="mr-1.5 h-4 w-4 text-primary" />{vendor.companySize}</p>}
               {vendor.yearsOfExperience !== undefined && <p className="text-sm text-muted-foreground flex items-center"><Clock className="mr-1.5 h-4 w-4 text-primary" />{vendor.yearsOfExperience} years of experience</p>}
               {vendor.availability && <p className="text-sm text-muted-foreground flex items-center"><Star className="mr-1.5 h-4 w-4 text-primary" />{vendor.availability}</p>}
-              
+
               {vendor.dunsNumber && <p className="text-sm text-muted-foreground flex items-center"><Landmark className="mr-1.5 h-4 w-4 text-primary" />DUNS: {vendor.dunsNumber}</p>}
 
               {vendor.portfolioLinks && vendor.portfolioLinks.length > 0 && (
@@ -145,7 +166,7 @@ export default function VendorProfilePage({ params }: { params: { id: string } }
                 </CardContent>
               </Card>
           )}
-          
+
           <Card>
             <CardHeader>
               <CardTitle className="text-xl flex items-center"><Layers className="mr-2 h-5 w-5 text-primary" /> Core Expertise & Services</CardTitle>
@@ -188,7 +209,7 @@ export default function VendorProfilePage({ params }: { params: { id: string } }
               </CardContent>
             </Card>
           )}
-          
+
           {vendor.industryFocus && vendor.industryFocus.length > 0 && (
             <Card>
               <CardHeader>
@@ -196,8 +217,8 @@ export default function VendorProfilePage({ params }: { params: { id: string } }
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {vendor.industryFocus.map((industry) => (
-                    <Badge key={industry} variant="outline" className="text-sm">{industry}</Badge>
+                  {vendor.industryFocus.map((industryItem) => (
+                    <Badge key={industryItem} variant="outline" className="text-sm">{industryItem}</Badge>
                   ))}
                 </div>
               </CardContent>
@@ -211,8 +232,8 @@ export default function VendorProfilePage({ params }: { params: { id: string } }
               </CardHeader>
               <CardContent>
                 <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                  {vendor.awardsAndCertifications.map((award) => (
-                    <li key={award}>{award}</li>
+                  {vendor.awardsAndCertifications.map((awardItem) => (
+                    <li key={awardItem}>{awardItem}</li>
                   ))}
                 </ul>
               </CardContent>
@@ -221,12 +242,20 @@ export default function VendorProfilePage({ params }: { params: { id: string } }
         </div>
       </div>
       <CardFooter className="mt-6 bg-muted/30 p-6 border-t flex justify-end">
-          <Button variant="default" size="lg" asChild>
-             <Link href={`/communication?vendorId=${vendor.id}`}> {/* Allow initiating communication even without specific opportunity */}
+          <Button variant="default" size="lg" asChild disabled={!isCurrentUserVerified}>
+             <Link href={`/communication?vendorId=${vendor.id}${isCurrentUserVerified ? '&verified=true' : ''}`}>
                 <MessageSquare className="mr-2 h-4 w-4" /> Contact Vendor
             </Link>
           </Button>
       </CardFooter>
     </>
+  );
+}
+
+export default function VendorProfilePage({ params }: { params: { id: string } }) {
+  return (
+    <Suspense fallback={<div>Loading vendor profile...</div>}>
+      <VendorProfileContent params={params} />
+    </Suspense>
   );
 }
