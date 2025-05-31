@@ -8,7 +8,7 @@ import { PageTitle } from '@/components/PageTitle';
 export default function DashboardPage() {
   return (
     <div className="flex flex-col items-center justify-center flex-1">
-      <div className="w-full max-w-4xl px-4">
+      <div className="w-full max-w-4xl px-4 text-center"> {/* Added text-center here */}
         <PageTitle
           title="Tandem Dashboard"
           description="Welcome to Tandem, your AI-powered vendor matchmaking platform."
