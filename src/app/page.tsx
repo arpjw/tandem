@@ -17,14 +17,14 @@ export default function LandingPage() {
 
   return (
     <TooltipProvider>
-      <div className="flex justify-end min-h-screen bg-background text-foreground">
-        <div className="w-full max-w-xl p-8 sm:p-12 md:p-16 flex flex-col justify-center">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground">
+        <div className="w-full max-w-xl p-8 sm:p-12 md:p-16 text-center">
           
-          <div className="flex justify-start mb-12">
+          <div className="flex justify-center mb-12">
             <Logo />
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-bold text-left mb-12">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-12">
             Who are you?
           </h1>
 
@@ -66,11 +66,11 @@ export default function LandingPage() {
             </Tooltip>
           </div>
 
-          <p className="text-muted-foreground text-left mb-8">
+          <p className="text-muted-foreground mb-8">
             Tandem is an AI-powered matchmaking platform designed to connect businesses with the best vendors for their projects.
           </p>
 
-          <p className="text-xs text-muted-foreground text-left">
+          <p className="text-xs text-muted-foreground">
             &copy; {currentYear !== null ? currentYear : '...'} Tandem. All rights reserved.
           </p>
         </div>
