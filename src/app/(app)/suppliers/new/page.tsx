@@ -15,8 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { generateSupplierProfileSummary } from '@/ai/flows/supplier-profile-generator'; // Renamed
-import type { SupplierProfileOutput } from '@/ai/flows/supplier-profile-generator'; // Renamed
+import { generateSupplierProfileSummary } from '@/ai/flows/supplier-profile-generator'; 
+import type { SupplierProfileOutput } from '@/ai/flows/supplier-profile-generator'; 
 import { ArrowLeft, Loader2, Sparkles, Briefcase, Award, Building2, Clock, Layers, FileText, Users, ShieldCheck, PlusCircle, Trash2, Globe, Tag } from 'lucide-react';
 import { PageTitle } from '@/components/PageTitle';
 import { Separator } from '@/components/ui/separator';
@@ -32,7 +32,7 @@ const projectHistorySchema = z.object({
   year: z.coerce.number().min(1980, "Invalid year.").max(new Date().getFullYear(), "Year cannot be in the future."),
 });
 
-const supplierFormSchema = z.object({ // Renamed
+const supplierFormSchema = z.object({ 
   name: z.string().min(3, { message: "Business name must be at least 3 characters." }),
   businessDescription: z.string().min(20, { message: "Description must be at least 20 characters." }),
   expertise: z.string().min(3, { message: "List at least one expertise area (comma-separated)." }), 
@@ -50,20 +50,20 @@ const supplierFormSchema = z.object({ // Renamed
   companySize: companySizeEnum.optional(),
   industryFocus: z.string().optional().describe("Comma-separated industry focus"),
   availability: z.string().optional(),
-  awardsAndCertificationsText: z.string().optional().describe("Additional awards/certs as text (comma-separated)"), // For AI input
+  awardsAndCertificationsText: z.string().optional().describe("Additional awards/certs as text (comma-separated)"), 
 });
 
-type SupplierFormValues = z.infer<typeof supplierFormSchema>; // Renamed
+type SupplierFormValues = z.infer<typeof supplierFormSchema>; 
 
-export default function NewSupplierPage() { // Renamed
+export default function NewSupplierPage() { 
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiProfile, setAiProfile] = useState<SupplierProfileOutput | null>(null); // Renamed
+  const [aiProfile, setAiProfile] = useState<SupplierProfileOutput | null>(null); 
 
-  const form = useForm<SupplierFormValues>({ // Renamed
-    resolver: zodResolver(supplierFormSchema), // Renamed
+  const form = useForm<SupplierFormValues>({ 
+    resolver: zodResolver(supplierFormSchema), 
     defaultValues: {
       name: '',
       businessDescription: '',
@@ -104,7 +104,7 @@ export default function NewSupplierPage() { // Renamed
     setIsAiLoading(true);
     setAiProfile(null);
     try {
-      const result = await generateSupplierProfileSummary({ // Renamed
+      const result = await generateSupplierProfileSummary({ 
         businessName: name,
         businessDescription,
         expertiseAreas: expertise,
@@ -130,7 +130,7 @@ export default function NewSupplierPage() { // Renamed
     }
   };
 
-  async function onSubmit(data: SupplierFormValues) { // Renamed
+  async function onSubmit(data: SupplierFormValues) { 
     setIsLoading(true);
     const processedData = {
       ...data,
@@ -142,26 +142,24 @@ export default function NewSupplierPage() { // Renamed
       awardsAndCertifications: data.awardsAndCertificationsText?.split(',').map(s => s.trim()).filter(s => s) || [],
       aiGeneratedProfile: aiProfile?.profileSummary,
     };
-    console.log("Supplier data submitted:", processedData); // Renamed
-    // Simulate API call (e.g., add to mockSuppliers or send to backend)
+    console.log("Supplier data submitted:", processedData); 
+    
     await new Promise(resolve => setTimeout(resolve, 1000));
     toast({
-      title: "Supplier Profile Created/Updated", // Renamed
+      title: "Supplier Profile Created/Updated", 
       description: `${data.name}'s profile has been successfully submitted.`,
     });
     setIsLoading(false);
-    router.push('/suppliers'); // Path updated
+    router.push('/suppliers'); 
   }
 
   return (
     <>
       <PageTitle 
-        title="Create / Update SMB Supplier Profile" // Renamed
+        title="Create / Update SMB Supplier Profile" 
         description="Showcase your business capabilities to connect with subcontracting opportunities."
         action={
-          <Button variant="outline" asChild>
-            <Link href="/suppliers"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Suppliers</Link> {/* Path updated */}
-          </Button>
+          <Button variant="outline" asChild><Link href="/suppliers"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Suppliers</Link></Button>
         }
       />
       
@@ -286,12 +284,12 @@ export default function NewSupplierPage() { // Renamed
           </div>
           
           <div className="flex justify-end gap-2 mt-8">
-            <Button type="button" variant="outline" onClick={() => router.push('/suppliers')}> {/* Path updated */}
+            <Button type="button" variant="outline" onClick={() => router.push('/suppliers')}> 
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Supplier Profile {/* Renamed */}
+              Save Supplier Profile 
             </Button>
           </div>
         </form>
