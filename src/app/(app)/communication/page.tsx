@@ -47,7 +47,6 @@ function CommunicationContent() {
   const searchParams = useSearchParams();
   const initialOpportunityId = searchParams.get('opportunityId');
   const initialSupplierId = searchParams.get('supplierId');
-  // const isUserVerified = searchParams.get('verified') === 'true'; // We will ignore this for now
 
   const [selectedConversation, setSelectedConversation] = useState<{ opportunityId: string, supplierId: string } | null>(null);
   const [messages, setMessages] = useState<EnrichedMessage[]>([]);
@@ -146,9 +145,7 @@ function CommunicationContent() {
         description="Connect and collaborate with SMBs on subcontracting opportunities."
       />
 
-      {/* Verification Alert Removed */}
-
-      <div className="flex h-[calc(100vh-200px)] gap-6"> {/* Removed conditional styling based on isUserVerified */}
+      <div className="flex h-[calc(100vh-200px)] gap-6">
         <Card className="w-1/3 flex flex-col">
           <CardHeader>
             <CardTitle>Conversations</CardTitle>
@@ -160,7 +157,6 @@ function CommunicationContent() {
                   key={`${convo.opportunityId}-${convo.supplierId}`}
                   onClick={() => setSelectedConversation({ opportunityId: convo.opportunityId, supplierId: convo.supplierId })}
                   className={`w-full text-left p-4 border-b hover:bg-muted/50 transition-colors ${selectedConversation?.opportunityId === convo.opportunityId && selectedConversation?.supplierId === convo.supplierId ? 'bg-muted shadow-inner' : ''}`}
-                  // disabled prop removed
                 >
                   <p className="font-semibold">{convo.opportunityTitle}</p>
                   <p className="text-sm text-muted-foreground flex items-center">
@@ -188,24 +184,26 @@ function CommunicationContent() {
                 </CardTitle>
                 <CardDescription>Regarding opportunity: {currentOpportunity.title}</CardDescription>
               </CardHeader>
-              <ScrollArea className="flex-grow p-6 space-y-4 bg-muted/20">
-                {messages.map(msg => (
-                  <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`flex items-end gap-2 max-w-[70%] ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={msg.sender === 'user' ? 'https://placehold.co/100x100.png' : currentSupplier.imageUrl || 'https://placehold.co/100x100.png'} data-ai-hint={msg.sender === 'user' ? 'prime contract manager' : 'supplier representative'} />
-                        <AvatarFallback>{msg.sender === 'user' ? 'ME' : currentSupplier.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div className={`p-3 rounded-lg shadow-sm ${msg.sender === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'}`}>
-                        <p className="text-sm">{msg.content}</p>
-                        <p className={`text-xs mt-1 ${msg.sender === 'user' ? 'text-primary-foreground/70 text-right' : 'text-muted-foreground'}`}>
-                          <FormattedTimestamp timestamp={msg.timestamp} formatType="message" />
-                        </p>
+              <ScrollArea className="flex-grow p-6 bg-muted/20">
+                <div className="space-y-6">
+                  {messages.map(msg => (
+                    <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`flex items-end gap-2 max-w-[70%] ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={msg.sender === 'user' ? 'https://placehold.co/100x100.png' : currentSupplier.imageUrl || 'https://placehold.co/100x100.png'} data-ai-hint={msg.sender === 'user' ? 'prime contract manager' : 'supplier representative'} />
+                          <AvatarFallback>{msg.sender === 'user' ? 'ME' : currentSupplier.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className={`p-3 rounded-lg shadow-sm ${msg.sender === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'}`}>
+                          <p className="text-sm">{msg.content}</p>
+                          <p className={`text-xs mt-1 ${msg.sender === 'user' ? 'text-primary-foreground/70 text-right' : 'text-muted-foreground'}`}>
+                            <FormattedTimestamp timestamp={msg.timestamp} formatType="message" />
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-                 {messages.length === 0 && <p className="text-center text-sm text-muted-foreground pt-10">No messages in this conversation yet. Start chatting!</p>}
+                  ))}
+                  {messages.length === 0 && <p className="text-center text-sm text-muted-foreground pt-10">No messages in this conversation yet. Start chatting!</p>}
+                </div>
               </ScrollArea>
               <CardFooter className="border-t pt-4 bg-background">
                 <form onSubmit={handleSendMessage} className="flex w-full items-center space-x-2">
@@ -215,9 +213,8 @@ function CommunicationContent() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     className="flex-1"
-                    // disabled prop removed
                   />
-                  <Button type="submit" size="icon" disabled={!newMessage.trim()}> {/* disabled only if no message */}
+                  <Button type="submit" size="icon" disabled={!newMessage.trim()}>
                     <Send className="h-4 w-4" />
                     <span className="sr-only">Send</span>
                   </Button>
