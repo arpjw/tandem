@@ -47,7 +47,7 @@ function CommunicationContent() {
   const searchParams = useSearchParams();
   const initialOpportunityId = searchParams.get('opportunityId');
   const initialSupplierId = searchParams.get('supplierId');
-  const isUserVerified = searchParams.get('verified') === 'true';
+  // const isUserVerified = searchParams.get('verified') === 'true'; // We will ignore this for now
 
   const [selectedConversation, setSelectedConversation] = useState<{ opportunityId: string, supplierId: string } | null>(null);
   const [messages, setMessages] = useState<EnrichedMessage[]>([]);
@@ -83,12 +83,13 @@ function CommunicationContent() {
     if (initialOpportunityId && initialSupplierId) {
       setSelectedConversation({ opportunityId: initialOpportunityId, supplierId: initialSupplierId });
     } else if (uniqueConversations.length > 0 && !selectedConversation) {
-      // Don't auto-select if not verified
+      // Auto-select the first conversation if none is selected from params
+      // setSelectedConversation({ opportunityId: uniqueConversations[0].opportunityId, supplierId: uniqueConversations[0].supplierId });
     }
   }, [initialOpportunityId, initialSupplierId, uniqueConversations, selectedConversation]);
 
   useEffect(() => {
-    if (selectedConversation && isUserVerified) {
+    if (selectedConversation) {
       const filteredMessages = mockMessages
         .filter(msg => msg.opportunityId === selectedConversation.opportunityId && msg.supplierId === selectedConversation.supplierId)
         .map(msg => {
@@ -105,11 +106,11 @@ function CommunicationContent() {
     } else {
       setMessages([]);
     }
-  }, [selectedConversation, isUserVerified]);
+  }, [selectedConversation]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedConversation || !isUserVerified) return;
+    if (!newMessage.trim() || !selectedConversation) return;
 
     const opportunity = mockOpportunities.find(p => p.id === selectedConversation.opportunityId);
     const supplier = mockSuppliers.find(v => v.id === selectedConversation.supplierId);
@@ -118,14 +119,14 @@ function CommunicationContent() {
       id: `msg${Date.now()}`,
       opportunityId: selectedConversation.opportunityId,
       supplierId: selectedConversation.supplierId,
-      sender: 'user', 
+      sender: 'user',
       content: newMessage.trim(),
       timestamp: new Date(),
       opportunityTitle: opportunity?.title,
       supplierName: supplier?.name,
     };
 
-    mockMessages.push(msgToAdd);
+    mockMessages.push(msgToAdd); // Note: Mutating mockData directly
     setMessages(prev => [...prev, msgToAdd]);
     setNewMessage('');
     const convoKey = `${selectedConversation.opportunityId}-${selectedConversation.supplierId}`;
@@ -145,21 +146,9 @@ function CommunicationContent() {
         description="Connect and collaborate with SMBs on subcontracting opportunities."
       />
 
-      {!isUserVerified && (
-         <Alert variant="destructive" className="mb-6">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Verification Required</AlertTitle>
-          <AlertDescription>
-            You must be a verified user to use the communication hub. If you are a supplier, please
-            <Button variant="link" asChild className="p-0 h-auto ml-1 text-destructive hover:text-destructive/80">
-              <Link href="/suppliers/onboarding/industry">Complete Verification</Link>
-            </Button>
-            . Buyers may also need verification for certain actions.
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Verification Alert Removed */}
 
-      <div className={`flex h-[calc(100vh-200px)] gap-6 ${!isUserVerified ? 'opacity-50 pointer-events-none blur-sm' : ''}`}>
+      <div className="flex h-[calc(100vh-200px)] gap-6"> {/* Removed conditional styling based on isUserVerified */}
         <Card className="w-1/3 flex flex-col">
           <CardHeader>
             <CardTitle>Conversations</CardTitle>
@@ -171,7 +160,7 @@ function CommunicationContent() {
                   key={`${convo.opportunityId}-${convo.supplierId}`}
                   onClick={() => setSelectedConversation({ opportunityId: convo.opportunityId, supplierId: convo.supplierId })}
                   className={`w-full text-left p-4 border-b hover:bg-muted/50 transition-colors ${selectedConversation?.opportunityId === convo.opportunityId && selectedConversation?.supplierId === convo.supplierId ? 'bg-muted shadow-inner' : ''}`}
-                  disabled={!isUserVerified}
+                  // disabled prop removed
                 >
                   <p className="font-semibold">{convo.opportunityTitle}</p>
                   <p className="text-sm text-muted-foreground flex items-center">
@@ -184,13 +173,13 @@ function CommunicationContent() {
                   </p>
                 </button>
               ))}
-              {uniqueConversations.length === 0 && isUserVerified && <p className="p-4 text-sm text-muted-foreground">No conversations yet. Start by contacting a supplier about an opportunity.</p>}
+              {uniqueConversations.length === 0 && <p className="p-4 text-sm text-muted-foreground">No conversations yet. Start by contacting a supplier about an opportunity.</p>}
             </CardContent>
           </ScrollArea>
         </Card>
 
         <Card className="w-2/3 flex flex-col">
-          {selectedConversation && currentOpportunity && currentSupplier && isUserVerified ? (
+          {selectedConversation && currentOpportunity && currentSupplier ? (
             <>
               <CardHeader className="border-b">
                 <CardTitle className="flex items-center">
@@ -226,9 +215,9 @@ function CommunicationContent() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     className="flex-1"
-                    disabled={!isUserVerified}
+                    // disabled prop removed
                   />
-                  <Button type="submit" size="icon" disabled={!newMessage.trim() || !isUserVerified}>
+                  <Button type="submit" size="icon" disabled={!newMessage.trim()}> {/* disabled only if no message */}
                     <Send className="h-4 w-4" />
                     <span className="sr-only">Send</span>
                   </Button>
@@ -239,9 +228,9 @@ function CommunicationContent() {
             <CardContent className="flex flex-col items-center justify-center h-full">
               <MessageSquare className="h-16 w-16 text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                {isUserVerified ? "Select a conversation to start chatting." : "Please verify your profile to access communications."}
+                Select a conversation to start chatting.
               </p>
-              {uniqueConversations.length === 0 && isUserVerified && <p className="text-sm text-muted-foreground mt-2">Find an opportunity and contact a supplier to begin.</p>}
+              {uniqueConversations.length === 0 && <p className="text-sm text-muted-foreground mt-2">Find an opportunity and contact a supplier to begin.</p>}
             </CardContent>
           )}
         </Card>
@@ -257,4 +246,3 @@ export default function CommunicationPage() {
     </Suspense>
   )
 }
-
