@@ -5,7 +5,7 @@ export const mockSuppliers: Supplier[] = [
   {
     id: 'smb1',
     name: 'TechSpark Innovations LLC',
-    businessDescription: 'MBE certified software development firm specializing in secure government and enterprise solutions. Proven expertise in cloud migration, data analytics, and cybersecurity compliance.',
+    businessDescription: 'MBES certified software development firm specializing in secure government and enterprise solutions. Proven expertise in cloud migration, data analytics, and cybersecurity compliance.',
     expertise: ['Java', 'Python', 'AWS GovCloud', 'Cybersecurity', 'Data Analytics'],
     services: ['Custom Software Development', 'Cloud Solutions Architecture', 'Security Audits', 'System Integration'],
     certifications: ['minority-owned', 'SBA 8a', 'HUBZone Certified'],
