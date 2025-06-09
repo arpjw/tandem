@@ -10,6 +10,11 @@ Tandem is an AI-powered matchmaking platform designed to connect businesses with
 *   **Project Posting**: Enables businesses to post project requirements, including necessary skills, budget, and timelines.
 *   **Communication Hub**: Provides a platform for vendors and businesses to discuss project details and establish partnerships.
 
+
+## User Onboarding Demonstration
+
+https://github.com/user-attachments/assets/1b8ecedc-67d2-4f13-b189-2d2e79156f44
+
 ## Getting Started
 
 To explore the application:
